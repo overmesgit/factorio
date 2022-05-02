@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="initial-scale = 1.0,maximum-scale = 3.0"/>
+    <style>
+
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/x-data-spreadsheet@1.1.5/dist/xspreadsheet.css">
+    <script src="https://unpkg.com/x-data-spreadsheet@1.1.5/dist/xspreadsheet.js"></script>
+
+
+</head>
+<body>
+<div id="xspreadsheet"></div>
+
+
+<script>
+    options = {
+        mode: 'edit',
+        showToolbar: true,
+        showGrid: true,
+        showContextmenu: true,
+        view: {
+            height: () => document.documentElement.clientHeight,
+            width: () => document.documentElement.clientWidth,
+        },
+        row: {
+            len: 100,
+            height: 50,
+        },
+        col: {
+            len: 50,
+            width: 50,
+            indexWidth: 50,
+            minWidth: 50,
+        },
+        style: {
+            bgcolor: '#ffffff',
+            align: 'left',
+            valign: 'middle',
+            textwrap: false,
+            strike: false,
+            underline: false,
+            color: '#0a0a0a',
+            font: {
+                name: 'Helvetica',
+                size: 6,
+                bold: false,
+                italic: false,
+            },
+        },
+    }
+    xspread = x_spreadsheet('#xspreadsheet', options);
+    xspread.change(data => {
+        console.log(data)
+    });
+
+    setInterval(() => {
+        xspread.cellText(5, 5, "Hello").reRender();
+    }, 1000)
+</script>
+
+</body>
+</html>

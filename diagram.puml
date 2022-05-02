@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+package "Map" {
+  HTTP - [Map]
+}
+
+package "Mine" {
+  GRPC_MINE - [MINE]
+}
+
+package "Connector" {
+  GRPC_CON - [Connector]
+}
+
+package "Belt" {
+  GRPC_BELT - [Belt]
+}
+
+
+
+
+[Map] --> [GRPC_MINE]
+[Map] --> [GRPC_CON]
+[Map] --> [GRPC_BELT]
+[GRPC_MINE] --> [GRPC_CON] : "if no next node"
+[GRPC_MINE] --> [GRPC_BELT] : "if next node"
+
+legend "All nodes should know about map to communicate with next node"
+
+
+'cloud {
+'}
+'
+'database "MySql" {
+'}
+
+@enduml
