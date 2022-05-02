@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "github.com/overmesgit/factorio/grpc";
+
+package grpc;
+
+service Mapper {
+  rpc updateMap (MapRequest) returns (MapReply) {}
+}
+
+message Node {
+  string type = 1;
+  int32 col = 2;
+  int32 row = 3;
+}
+
+message URL {
+  string type = 1;
+  string url = 2;
+}
+
+message MapRequest {
+  repeated Node nodes = 1;
+  repeated URL url_map = 2;
+}
+
+message MapReply {
+//  string message = 1;
+}
