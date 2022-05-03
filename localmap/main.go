@@ -13,7 +13,7 @@ import (
 type Type string
 
 const (
-	MapServer = "34.146.166.243"
+	MapServer = "35.243.65.153"
 
 	MINE Type = "MINE"
 )

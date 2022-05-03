@@ -20,9 +20,17 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.UpdateMap(ctx, &pb.MapRequest{})
+	r, err := c.UpdateMap(ctx, &pb.MapRequest{Nodes: []*pb.Node{
+		{
+			Type:  "MINE",
+			Col:   0,
+			Row:   0,
+			Ip:    "",
+			Items: nil,
+		},
+	}})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("could not update: %v", err)
 	}
 	log.Printf("Resp: %s", r.GetNodes())
 }

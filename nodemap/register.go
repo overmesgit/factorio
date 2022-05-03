@@ -18,7 +18,7 @@ type Map struct {
 	sync.Mutex
 }
 
-var nodeMap = Map{}
+var nodeMap = Map{nodes: make(map[Key]*pb.Node, 0)}
 
 func RegisterServer(in *grpc.IpRequest) error {
 	nodeMap.Lock()
@@ -29,7 +29,7 @@ func RegisterServer(in *grpc.IpRequest) error {
 	}
 	val, ok := nodeMap.nodes[k]
 	if !ok {
-		err := errors.New(fmt.Sprintf("unknown node %v", in))
+		err := errors.New(fmt.Sprintf("Map Unregistered node %v", in))
 		log.Println(err)
 		return err
 	}
