@@ -1,73 +1,38 @@
-package main
+package mine
 
 import (
-	"cloud.google.com/go/datastore"
 	"context"
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
+	"github.com/overmesgit/factorio/localmap"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"google.golang.org/grpc"
 	"log"
 	"net"
 )
 
-type Type string
-
-const (
-	MINE Type = "MINE"
-)
-
-type Service struct {
-	row, col    int32
-	serviceType Type
-}
+var MyType localmap.Type
+var AdjustedNodes []*pb.Node
 
 type server struct {
-	pb.UnimplementedMapperServer
-}
-
-var (
-	Nodes  []*pb.Node
-	UrlMap []*pb.URL
-)
-
-var dataStore *datastore.Client
-
-type ItemType string
-
-const (
-	Iron ItemType = "iron"
-)
-
-type Item struct {
-	ItemType ItemType
-	Count    int
-}
-
-type Node struct {
-	NodeType string
-}
-
-func (s *server) DoMineWork() {
+	pb.UnimplementedMineServer
 }
 
 func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
-	Nodes = in.GetNodes()
-	log.Printf("Received6: %v", Nodes)
-
-	UrlMap = in.GetUrlMap()
-	log.Printf("Received6: %v", UrlMap)
-
-	s.DoMineWork()
 
 	return &pb.MapReply{}, nil
 }
 
-func main() {
-	myIp, err := GetIp()
+func RunServer() {
+	conn, err := grpc.Dial(localmap.MapServer+":8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	defer conn.Close()
+
+	RunMapper(conn)
+	RunWorker()
 
 	port := "8080"
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
@@ -75,7 +40,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterMapperServer(s, &server{})
+	pb.RegisterMineServer(s, &server{})
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)

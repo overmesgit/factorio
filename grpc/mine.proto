@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option go_package = "github.com/overmesgit/factorio/grpc";
+option go_package = "factorio/grpc";
 
 package grpc;
 
-service Mapper {
+service Mine {
   rpc sendResource (ItemRequest) returns (ItemReply) {}
 }
 

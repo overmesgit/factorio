@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MapClient interface {
 	NotifyIp(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*IpReply, error)
+	UpdateMap(ctx context.Context, in *MapRequest, opts ...grpc.CallOption) (*MapReply, error)
 }
 
 type mapClient struct {
@@ -42,11 +43,21 @@ func (c *mapClient) NotifyIp(ctx context.Context, in *IpRequest, opts ...grpc.Ca
 	return out, nil
 }
 
+func (c *mapClient) UpdateMap(ctx context.Context, in *MapRequest, opts ...grpc.CallOption) (*MapReply, error) {
+	out := new(MapReply)
+	err := c.cc.Invoke(ctx, "/grpc.Map/updateMap", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MapServer is the server API for Map service.
 // All implementations must embed UnimplementedMapServer
 // for forward compatibility
 type MapServer interface {
 	NotifyIp(context.Context, *IpRequest) (*IpReply, error)
+	UpdateMap(context.Context, *MapRequest) (*MapReply, error)
 	mustEmbedUnimplementedMapServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedMapServer struct {
 
 func (UnimplementedMapServer) NotifyIp(context.Context, *IpRequest) (*IpReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NotifyIp not implemented")
+}
+func (UnimplementedMapServer) UpdateMap(context.Context, *MapRequest) (*MapReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMap not implemented")
 }
 func (UnimplementedMapServer) mustEmbedUnimplementedMapServer() {}
 
@@ -88,6 +102,24 @@ func _Map_NotifyIp_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Map_UpdateMap_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MapRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MapServer).UpdateMap(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc.Map/updateMap",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MapServer).UpdateMap(ctx, req.(*MapRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Map_ServiceDesc is the grpc.ServiceDesc for Map service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var Map_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "notifyIp",
 			Handler:    _Map_NotifyIp_Handler,
+		},
+		{
+			MethodName: "updateMap",
+			Handler:    _Map_UpdateMap_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

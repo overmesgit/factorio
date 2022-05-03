@@ -1,11 +1,12 @@
 syntax = "proto3";
 
-option go_package = "github.com/overmesgit/factorio/grpc";
+option go_package = "factorio/grpc";
 
 package grpc;
 
 service Map {
   rpc notifyIp (IpRequest) returns (IpReply) {}
+  rpc updateMap (MapRequest) returns (MapReply) {}
 }
 
 message Node {
@@ -13,14 +14,29 @@ message Node {
   int32 col = 2;
   int32 row = 3;
   string ip = 4;
+  repeated Item items = 5;
+}
+
+message Item {
+  string type = 1;
+  string count = 2;
 }
 
 message IpRequest {
   string ip = 1;
   int32 col = 2;
   int32 row = 3;
+  repeated Item items = 5;
 }
 
 message IpReply {
   repeated Node adjusted_nodes = 1;
+}
+
+message MapRequest {
+  repeated Node nodes = 1;
+}
+
+message MapReply {
+  repeated Node nodes = 1;
 }

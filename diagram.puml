@@ -22,7 +22,11 @@ package "Mine2" {
 [GRPC_MINE] -> [GRPC_MAP]
 [GRPC_MINE2] -> [GRPC_MAP]
 
-legend "All nodes should know about map to communicate with next node"
+legend
+1. User creates node and send to Map.
+2. Node connects to Map and send Ip, Updated Items, gets Node type, gets next nodes.
+3. Node produces send item to next node if it can.
+end legend
 
 
 'cloud {

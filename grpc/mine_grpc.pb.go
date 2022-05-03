@@ -18,86 +18,86 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// MapperClient is the client API for Mapper service.
+// MineClient is the client API for Mine service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MapperClient interface {
-	UpdateMap(ctx context.Context, in *MapRequest, opts ...grpc.CallOption) (*MapReply, error)
+type MineClient interface {
+	SendResource(ctx context.Context, in *ItemRequest, opts ...grpc.CallOption) (*ItemReply, error)
 }
 
-type mapperClient struct {
+type mineClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMapperClient(cc grpc.ClientConnInterface) MapperClient {
-	return &mapperClient{cc}
+func NewMineClient(cc grpc.ClientConnInterface) MineClient {
+	return &mineClient{cc}
 }
 
-func (c *mapperClient) UpdateMap(ctx context.Context, in *MapRequest, opts ...grpc.CallOption) (*MapReply, error) {
-	out := new(MapReply)
-	err := c.cc.Invoke(ctx, "/grpc.Mapper/updateMap", in, out, opts...)
+func (c *mineClient) SendResource(ctx context.Context, in *ItemRequest, opts ...grpc.CallOption) (*ItemReply, error) {
+	out := new(ItemReply)
+	err := c.cc.Invoke(ctx, "/grpc.Mine/sendResource", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MapperServer is the server API for Mapper service.
-// All implementations must embed UnimplementedMapperServer
+// MineServer is the server API for Mine service.
+// All implementations must embed UnimplementedMineServer
 // for forward compatibility
-type MapperServer interface {
-	UpdateMap(context.Context, *MapRequest) (*MapReply, error)
-	mustEmbedUnimplementedMapperServer()
+type MineServer interface {
+	SendResource(context.Context, *ItemRequest) (*ItemReply, error)
+	mustEmbedUnimplementedMineServer()
 }
 
-// UnimplementedMapperServer must be embedded to have forward compatible implementations.
-type UnimplementedMapperServer struct {
+// UnimplementedMineServer must be embedded to have forward compatible implementations.
+type UnimplementedMineServer struct {
 }
 
-func (UnimplementedMapperServer) UpdateMap(context.Context, *MapRequest) (*MapReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateMap not implemented")
+func (UnimplementedMineServer) SendResource(context.Context, *ItemRequest) (*ItemReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendResource not implemented")
 }
-func (UnimplementedMapperServer) mustEmbedUnimplementedMapperServer() {}
+func (UnimplementedMineServer) mustEmbedUnimplementedMineServer() {}
 
-// UnsafeMapperServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MapperServer will
+// UnsafeMineServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MineServer will
 // result in compilation errors.
-type UnsafeMapperServer interface {
-	mustEmbedUnimplementedMapperServer()
+type UnsafeMineServer interface {
+	mustEmbedUnimplementedMineServer()
 }
 
-func RegisterMapperServer(s grpc.ServiceRegistrar, srv MapperServer) {
-	s.RegisterService(&Mapper_ServiceDesc, srv)
+func RegisterMineServer(s grpc.ServiceRegistrar, srv MineServer) {
+	s.RegisterService(&Mine_ServiceDesc, srv)
 }
 
-func _Mapper_UpdateMap_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MapRequest)
+func _Mine_SendResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ItemRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MapperServer).UpdateMap(ctx, in)
+		return srv.(MineServer).SendResource(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Mapper/updateMap",
+		FullMethod: "/grpc.Mine/sendResource",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MapperServer).UpdateMap(ctx, req.(*MapRequest))
+		return srv.(MineServer).SendResource(ctx, req.(*ItemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Mapper_ServiceDesc is the grpc.ServiceDesc for Mapper service.
+// Mine_ServiceDesc is the grpc.ServiceDesc for Mine service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Mapper_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.Mapper",
-	HandlerType: (*MapperServer)(nil),
+var Mine_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "grpc.Mine",
+	HandlerType: (*MineServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "updateMap",
-			Handler:    _Mapper_UpdateMap_Handler,
+			MethodName: "sendResource",
+			Handler:    _Mine_SendResource_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
