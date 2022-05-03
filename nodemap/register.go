@@ -38,6 +38,30 @@ func RegisterServer(in *grpc.IpRequest) error {
 	return nil
 }
 
+func GetAdjustedNodes(in *pb.IpRequest) []*pb.Node {
+	currentKey := Key{
+		row: in.Row,
+		col: in.Col,
+	}
+	resp := []*pb.Node{nodeMap.nodes[currentKey]}
+	for _, offset := range [][]int32{
+		{1, 0},
+		{-1, 0},
+		{0, 1},
+		{0, -1},
+	} {
+		k := Key{
+			row: in.Row + offset[0],
+			col: in.Col + offset[1],
+		}
+		val, ok := nodeMap.nodes[k]
+		if ok {
+			resp = append(resp, val)
+		}
+	}
+	return resp
+}
+
 func UpdateMap(in *pb.MapRequest) []*pb.Node {
 	nodeMap.Lock()
 	defer nodeMap.Unlock()

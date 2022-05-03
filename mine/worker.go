@@ -14,6 +14,8 @@ func DoWork() {
 		time.Sleep(time.Second)
 		if MyType != "" {
 			log.Printf("Do some work %v\n", MyType)
+		} else {
+			log.Printf("Waiting for mytype %v\n", MyType)
 		}
 	}
 }

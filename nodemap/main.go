@@ -19,8 +19,8 @@ func (s *server) NotifyIp(ctx context.Context, in *pb.IpRequest) (*pb.IpReply, e
 	if err != nil {
 		return nil, err
 	}
-
-	return &pb.IpReply{}, nil
+	resp := GetAdjustedNodes(in)
+	return &pb.IpReply{AdjustedNodes: resp}, nil
 }
 
 func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
