@@ -1,7 +1,0 @@
-FROM alpine
-
-WORKDIR /
-
-COPY mind_cmd /usr/local/bin/mind_cmd
-
-CMD ["mind_cmd"]
