@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	log.Println("1011")
+	log.Println("101111")
 	mine.RunServer()
 }
