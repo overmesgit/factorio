@@ -1,30 +1,26 @@
 @startuml
 'https://plantuml.com/component-diagram
 
+package "Local" {
+  [LocalMachine]
+}
+
 package "Map" {
-  HTTP - [Map]
+  GRPC_MAP - [Map]
 }
 
 package "Mine" {
   GRPC_MINE - [MINE]
 }
 
-package "Connector" {
-  GRPC_CON - [Connector]
-}
-
-package "Belt" {
-  GRPC_BELT - [Belt]
+package "Mine2" {
+  GRPC_MINE2 - [MINE2]
 }
 
 
-
-
-[Map] --> [GRPC_MINE]
-[Map] --> [GRPC_CON]
-[Map] --> [GRPC_BELT]
-[GRPC_MINE] --> [GRPC_CON] : "if no next node"
-[GRPC_MINE] --> [GRPC_BELT] : "if next node"
+[LocalMachine] ---> [GRPC_MAP]
+[GRPC_MINE] -> [GRPC_MAP]
+[GRPC_MINE2] -> [GRPC_MAP]
 
 legend "All nodes should know about map to communicate with next node"
 

@@ -6,17 +6,6 @@ import (
 	"net/http"
 )
 
-type Type string
-
-const (
-	MINE Type = "MINE"
-)
-
-type Service struct {
-	row, col    int32
-	serviceType Type
-}
-
 func main() {
 	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("hello")

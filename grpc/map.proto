@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "github.com/overmesgit/factorio/grpc";
+
+package grpc;
+
+service Map {
+  rpc notifyIp (IpRequest) returns (IpReply) {}
+}
+
+message Node {
+  string type = 1;
+  int32 col = 2;
+  int32 row = 3;
+  string ip = 4;
+}
+
+message IpRequest {
+  string ip = 1;
+  int32 col = 2;
+  int32 row = 3;
+}
+
+message IpReply {
+  repeated Node adjusted_nodes = 1;
+}
