@@ -14,7 +14,7 @@ var Nodes []*pb.Node
 
 func createInstance(row, col int32, nodeType string) error {
 	nodeName := fmt.Sprintf("r%vc%v", row, col)
-	command := fmt.Sprintf("gcloud compute instances create %v --image-family cos-stable --image-project cos-cloud --metadata-from-file user-data=init --metadata=cos-metrics-enabled=true --zone=asia-northeast1-a --machine-type=e2-micro --project=factorio2022", nodeName)
+	command := fmt.Sprintf("gcloud compute instances create %v --image-family cos-stable --image-project cos-cloud --metadata-from-file user-data=infra/init --metadata=cos-metrics-enabled=true --zone=asia-northeast1-a --machine-type=e2-micro --project=factorio2022", nodeName)
 	log.Println(command)
 	runner := exec.Command("bash", "-c", command)
 	cmd, err := runner.Output()

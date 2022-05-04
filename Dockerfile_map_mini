@@ -1,7 +1,0 @@
-FROM alpine
-
-WORKDIR /
-
-COPY map_cmd /usr/local/bin/app
-
-CMD ["app"]

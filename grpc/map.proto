@@ -15,6 +15,8 @@ message Node {
   int32 row = 3;
   string ip = 4;
   repeated Item items = 5;
+  //→←↑↓
+  string direction = 6;
 }
 
 message Item {

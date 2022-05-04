@@ -22,11 +22,12 @@ func main() {
 	defer cancel()
 	r, err := c.UpdateMap(ctx, &pb.MapRequest{Nodes: []*pb.Node{
 		{
-			Type:  "MINE",
-			Col:   0,
-			Row:   0,
-			Ip:    "",
-			Items: nil,
+			Type:      "MINE",
+			Col:       0,
+			Row:       0,
+			Ip:        "",
+			Items:     nil,
+			Direction: "↓",
 		},
 	}})
 	if err != nil {

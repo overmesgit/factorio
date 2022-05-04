@@ -1,7 +1,0 @@
-FROM alpine
-
-WORKDIR /
-
-COPY mine_cmd /usr/local/bin/app
-
-CMD ["app"]

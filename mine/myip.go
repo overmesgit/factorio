@@ -109,7 +109,7 @@ func (s *server) RegisterInMapServer(conn *grpc.ClientConn, ip string, name stri
 
 	AdjustedNodes = r.GetAdjustedNodes()
 	for _, node := range AdjustedNodes {
-		if node.Row == row && node.Col == col {
+		if node.Row == row && node.Col == col && MyType != localmap.Type(node.Type) {
 			MyType = localmap.Type(node.Type)
 			s.logger.Infof("Set my type: %s\n", MyType)
 		}
