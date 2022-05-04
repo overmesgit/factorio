@@ -1,21 +1,20 @@
 package mine
 
 import (
-	"log"
 	"time"
 )
 
-func RunWorker() {
-	go DoWork()
+func (s *server) RunWorker() {
+	go s.DoWork()
 }
 
-func DoWork() {
+func (s *server) DoWork() {
 	for {
 		time.Sleep(time.Second)
 		if MyType != "" {
-			log.Printf("Do some work %v\n", MyType)
+			s.logger.Infof("Do some work %v\n", MyType)
 		} else {
-			log.Printf("Waiting for mytype %v\n", MyType)
+			s.logger.Infof("Waiting for mytype %v\n", MyType)
 		}
 	}
 }

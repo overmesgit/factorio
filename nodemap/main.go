@@ -7,7 +7,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
-	"log"
 	"net"
 )
 
@@ -17,15 +16,7 @@ type server struct {
 }
 
 func (s *server) NotifyIp(ctx context.Context, in *pb.IpRequest) (*pb.IpReply, error) {
-	p, ok := peer.FromContext(ctx)
-	addr := "unknown"
-	if ok {
-		addr = p.Addr.String()
-	}
-	s.logger.Infow("Received message",
-		"message", in,
-		"ip", addr,
-	)
+	LogInput(ctx, in, s.logger)
 	err := s.RegisterServer(in)
 	if err != nil {
 		return nil, err
@@ -37,10 +28,21 @@ func (s *server) NotifyIp(ctx context.Context, in *pb.IpRequest) (*pb.IpReply, e
 	return &pb.IpReply{AdjustedNodes: resp}, nil
 }
 
-func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
-	log.Printf("Received: %v", in)
-	nodeMap := UpdateMap(in)
+func LogInput(ctx context.Context, in interface{}, logger *zap.SugaredLogger) {
+	p, ok := peer.FromContext(ctx)
+	addr := "unknown"
+	if ok {
+		addr = p.Addr.String()
+	}
+	logger.Infow("Received message",
+		"message", in,
+		"ip", addr,
+	)
+}
 
+func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
+	LogInput(ctx, in, s.logger)
+	nodeMap := UpdateMap(in)
 	return &pb.MapReply{Nodes: nodeMap}, nil
 }
 

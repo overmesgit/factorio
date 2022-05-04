@@ -6,33 +6,32 @@ import (
 	"github.com/overmesgit/factorio/localmap"
 	"google.golang.org/grpc"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func RunMapper(conn *grpc.ClientConn) {
-	myIp, err := GetIp()
+func (s *server) RunMapper(conn *grpc.ClientConn) {
+	myIp, err := s.GetIp()
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		s.logger.Fatalf("failed to listen: %v", err)
 	}
 
-	name, err := GetHostName()
+	name, err := s.GetHostName()
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		s.logger.Fatalf("failed to listen: %v", err)
 	}
 
 	go func() {
 		for {
 			time.Sleep(time.Second)
-			RegisterInMapServer(conn, myIp, name)
+			s.RegisterInMapServer(conn, myIp, name)
 		}
 	}()
 }
 
-func GetIp() (string, error) {
+func (s *server) GetIp() (string, error) {
 	client := &http.Client{}
 	request, err := http.NewRequest("GET", "http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip", nil)
 	if err != nil {
@@ -50,7 +49,7 @@ func GetIp() (string, error) {
 	return string(ip), err
 }
 
-func GetHostName() (string, error) {
+func (s *server) GetHostName() (string, error) {
 	client := &http.Client{}
 	request, err := http.NewRequest("GET", "http://metadata/computeMetadata/v1/instance/hostname", nil)
 	if err != nil {
@@ -70,7 +69,7 @@ func GetHostName() (string, error) {
 	return split[0], err
 }
 
-func GetRowCol(name string) (int32, int32, error) {
+func (s *server) GetRowCol(name string) (int32, int32, error) {
 	// r0c0
 	res := strings.Split(name[1:], "c")
 	row, err := strconv.Atoi(res[0])
@@ -85,11 +84,11 @@ func GetRowCol(name string) (int32, int32, error) {
 	return int32(row), int32(col), nil
 }
 
-func RegisterInMapServer(conn *grpc.ClientConn, ip string, name string) {
+func (s *server) RegisterInMapServer(conn *grpc.ClientConn, ip string, name string) {
 
-	row, col, err := GetRowCol(name)
+	row, col, err := s.GetRowCol(name)
 	if err != nil {
-		log.Printf("could not update ip: %v\n", err)
+		s.logger.Errorf("Could not update my ip: %v\n", err)
 		return
 	}
 
@@ -103,16 +102,16 @@ func RegisterInMapServer(conn *grpc.ClientConn, ip string, name string) {
 		Items: nil,
 	})
 	if err != nil {
-		log.Printf("could not update ip: %v\n", err)
+		s.logger.Errorf("Could not update my ip: %v\n", err)
 		return
 	}
-	log.Printf("Response: %s\n", r.String())
+	s.logger.Infof("Response: %s\n", r.String())
 
-	AdjustedNodes := r.GetAdjustedNodes()
+	AdjustedNodes = r.GetAdjustedNodes()
 	for _, node := range AdjustedNodes {
 		if node.Row == row && node.Col == col {
 			MyType = localmap.Type(node.Type)
-			log.Printf("Set my type: %s\n", MyType)
+			s.logger.Infof("Set my type: %s\n", MyType)
 		}
 	}
 }

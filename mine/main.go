@@ -5,6 +5,7 @@ import (
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
 	"github.com/overmesgit/factorio/localmap"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"google.golang.org/grpc"
@@ -17,32 +18,46 @@ var AdjustedNodes []*pb.Node
 
 type server struct {
 	pb.UnimplementedMineServer
+	logger *zap.SugaredLogger
 }
 
-func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
-
-	return &pb.MapReply{}, nil
+func (s *server) SendResource(ctx context.Context, request *pb.ItemRequest) (*pb.ItemReply, error) {
+	panic("implement me")
 }
 
 func RunServer() {
-	conn, err := grpc.Dial(localmap.MapServer+":8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
+	port := "8080"
+	sugar := logger.Sugar()
+	sugar.Infow("Starting mine server",
+		"port", port,
+	)
+
+	conn, err := grpc.Dial(localmap.MapServer+":"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	defer conn.Close()
 
-	RunMapper(conn)
-	RunWorker()
+	server := &server{logger: sugar}
+	server.RunMapper(conn)
+	server.RunWorker()
 
-	port := "8080"
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		sugar.Fatalw("Failed to listen",
+			"error", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterMineServer(s, &server{})
-	log.Printf("server listening at %v", lis.Addr())
+	pb.RegisterMineServer(s, server)
+	sugar.Infow("server started",
+		"port", port,
+		"addr", lis.Addr(),
+	)
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		sugar.Fatalw("Server failed",
+			"error", err)
 	}
 }
