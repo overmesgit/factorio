@@ -20,7 +20,7 @@ type Map struct {
 
 var nodeMap = Map{nodes: make(map[Key]*pb.Node, 0)}
 
-func RegisterServer(in *grpc.IpRequest) error {
+func (s *server) RegisterServer(in *grpc.IpRequest) error {
 	nodeMap.Lock()
 	defer nodeMap.Unlock()
 	k := Key{
@@ -29,16 +29,19 @@ func RegisterServer(in *grpc.IpRequest) error {
 	}
 	val, ok := nodeMap.nodes[k]
 	if !ok {
-		err := errors.New(fmt.Sprintf("Map Unregistered node %v", in))
-		log.Println(err)
+		err := errors.New(fmt.Sprintf("Trying to map unregistered node %v", in))
+		s.logger.Errorw(err.Error())
 		return err
 	}
+
+	s.logger.Infow("Registering node",
+		"ip", in.GetIp(), "items", in.Items)
 	val.Ip = in.GetIp()
 	val.Items = in.Items
 	return nil
 }
 
-func GetAdjustedNodes(in *pb.IpRequest) []*pb.Node {
+func (s *server) GetAdjustedNodes(in *pb.IpRequest) []*pb.Node {
 	currentKey := Key{
 		row: in.Row,
 		col: in.Col,
