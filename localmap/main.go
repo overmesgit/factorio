@@ -24,6 +24,13 @@ const (
 	IronMine Type = "MI"
 )
 
+type ItemType string
+
+const (
+	Iron ItemType = "IRON"
+	Coal ItemType = "COAL"
+)
+
 func RunServer() {
 	conn, err := grpc.Dial(MapServer+":8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -47,15 +54,14 @@ func RunServer() {
 		}
 		log.Println("Got data", nodes)
 
-		err = syncInstances(nodes)
-		resp := ""
+		syncInstances(nodes)
+
+		resp, err := json.Marshal(DateFromMap)
 		if err != nil {
 			log.Println(err)
-			resp = err.Error()
-		} else {
-			resp = "OK"
+			return
 		}
-		_, err = w.Write([]byte(resp))
+		_, err = w.Write(resp)
 		if err != nil {
 			log.Println(err)
 		}

@@ -1,6 +1,8 @@
 package mine
 
 import (
+	pb "github.com/overmesgit/factorio/grpc"
+	"github.com/overmesgit/factorio/localmap"
 	"time"
 )
 
@@ -11,10 +13,31 @@ func (s *server) RunWorker() {
 func (s *server) DoWork() {
 	for {
 		time.Sleep(time.Second)
-		if MyType != "" {
-			s.logger.Infof("Do some work %v\n", MyType)
-		} else {
-			s.logger.Infof("Waiting for mytype %v\n", MyType)
+		s.logger.Infof("Do work for %v\n", MyType)
+		switch MyType {
+		case localmap.IronMine:
+			s.ironMine()
+		default:
+			s.logger.Warnf("Waiting for my type %v\n", MyType)
+
 		}
+	}
+}
+
+func (s *server) ironMine() {
+	mineType := localmap.Iron
+
+	localStore, ok := MyItems[mineType]
+	if !ok {
+		localStore = &pb.Item{
+			Type:  string(mineType),
+			Count: 0,
+		}
+		MyItems[mineType] = localStore
+	}
+
+	s.logger.Infof("LocalStore %v\n", localStore)
+	if localStore.Count < 100 {
+		localStore.Count++
 	}
 }

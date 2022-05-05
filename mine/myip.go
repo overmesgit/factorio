@@ -95,11 +95,16 @@ func (s *server) RegisterInMapServer(conn *grpc.ClientConn, ip string, name stri
 	c := pb.NewMapClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
+	itemsList := make([]*pb.Item, 0)
+	for _, item := range MyItems {
+		itemsList = append(itemsList, item)
+	}
 	r, err := c.NotifyIp(ctx, &pb.IpRequest{
 		Ip:    ip,
 		Col:   col,
 		Row:   row,
-		Items: nil,
+		Items: itemsList,
 	})
 	if err != nil {
 		s.logger.Errorf("Could not update my ip: %v\n", err)

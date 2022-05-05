@@ -11,6 +11,7 @@ import (
 )
 
 var NodesStore []*pb.Node
+var DateFromMap []*pb.Node
 
 type Key struct {
 	Row, Col int32
@@ -18,7 +19,7 @@ type Key struct {
 
 var CreatedNodes = make(map[Key]*pb.Node)
 
-func syncInstances(nodes []*pb.Node) error {
+func syncInstances(nodes []*pb.Node) {
 	NodesStore = nodes
 	for _, node := range nodes {
 		key := Key{
@@ -31,7 +32,6 @@ func syncInstances(nodes []*pb.Node) error {
 			CreatedNodes[key] = node
 		}
 	}
-	return nil
 }
 
 func createInstance(row, col int32) {
@@ -55,7 +55,7 @@ func UpdateMap(conn *grpc.ClientConn) {
 	}
 }
 
-func Update(conn *grpc.ClientConn) bool {
+func Update(conn *grpc.ClientConn) {
 	c := pb.NewMapClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -64,8 +64,9 @@ func Update(conn *grpc.ClientConn) bool {
 	})
 	if err != nil {
 		log.Printf("could not update nodes: %v\n", err)
-		return true
+		return
 	}
-	log.Printf("response: %s\n", r.String())
-	return false
+	log.Printf("response from map: %s\n", r.String())
+
+	DateFromMap = r.GetNodes()
 }

@@ -16,7 +16,7 @@ type server struct {
 }
 
 func (s *server) NotifyIp(ctx context.Context, in *pb.IpRequest) (*pb.IpReply, error) {
-	LogInput(ctx, in, s.logger)
+	LogInput(ctx, "NotifyIp", in, s.logger)
 	err := s.RegisterServer(in)
 	if err != nil {
 		return nil, err
@@ -28,20 +28,19 @@ func (s *server) NotifyIp(ctx context.Context, in *pb.IpRequest) (*pb.IpReply, e
 	return &pb.IpReply{AdjustedNodes: resp}, nil
 }
 
-func LogInput(ctx context.Context, in interface{}, logger *zap.SugaredLogger) {
+func LogInput(ctx context.Context, name string, in interface{}, logger *zap.SugaredLogger) {
 	p, ok := peer.FromContext(ctx)
 	addr := "unknown"
 	if ok {
 		addr = p.Addr.String()
 	}
-	logger.Infow("Received message",
-		"message", in,
-		"ip", addr,
+	logger.Infof("Received message %v ip %v %v",
+		name, addr, in,
 	)
 }
 
 func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
-	LogInput(ctx, in, s.logger)
+	LogInput(ctx, "UpdateMap", in, s.logger)
 	nodeMap := s.RunUpdateMap(in)
 	return &pb.MapReply{Nodes: nodeMap}, nil
 }

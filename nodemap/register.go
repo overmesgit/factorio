@@ -26,17 +26,16 @@ func (s *server) RegisterServer(in *grpc.IpRequest) error {
 		row: in.Row,
 		col: in.Col,
 	}
-	val, ok := nodeMap.nodes[k]
+	node, ok := nodeMap.nodes[k]
 	if !ok {
 		err := errors.New(fmt.Sprintf("Trying to map unregistered node %v", in))
 		s.logger.Errorw(err.Error())
 		return err
 	}
 
-	s.logger.Infow("Registering node",
-		"ip", in.GetIp(), "items", in.Items)
-	val.Ip = in.GetIp()
-	val.Items = in.Items
+	s.logger.Infof("Registering node %v %v", in.GetIp(), in.GetItems())
+	node.Ip = in.GetIp()
+	node.Items = in.GetItems()
 	return nil
 }
 

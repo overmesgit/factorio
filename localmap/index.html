@@ -79,16 +79,21 @@
             method: 'POST',
             body: JSON.stringify(respData)
         });
-        console.log(await response.text())
+        let data = await response.json();
+        console.log("resp from server", data)
 
-        // cell = xspread.cell(5, 5)
-        // console.log(cell)
-        // if (cell) {
-        //     text = cell.text.split("\n")[0]
-        //     xspread.cellText(5, 5, text + "\n" + l).reRender();
-        // } else {
-        //     xspread.cellText(5, 5, "<p>hi</p>").reRender();
-        // }
+        //0: {type: 'MI', col: 9, row: 5, ip: '35.221.65.163', items: Array(1), …
+        for (let cellData of data) {
+            let cell = xspread.cell(cellData.row, cellData.col)
+            if (cell && cellData.items && cellData.items.length > 0) {
+                let newMessage = []
+                for (let item of cellData.items) {
+                    newMessage.push(item.type.slice(0, 2) + "" + item.count)
+                }
+                let text = cell.text.split("\n")[0]
+                xspread.cellText(cellData.row, cellData.col, text + "\n" + newMessage.join("\n")).reRender();
+            }
+        }
     }
 
     setInterval(() => {

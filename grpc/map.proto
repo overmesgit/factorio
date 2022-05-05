@@ -21,7 +21,7 @@ message Node {
 
 message Item {
   string type = 1;
-  string count = 2;
+  int64 count = 2;
 }
 
 message IpRequest {
