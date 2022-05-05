@@ -10,9 +10,31 @@ import (
 	"time"
 )
 
-var Nodes []*pb.Node
+var NodesStore []*pb.Node
 
-func createInstance(row, col int32, nodeType string) error {
+type Key struct {
+	Row, Col int32
+}
+
+var CreatedNodes = make(map[Key]*pb.Node)
+
+func syncInstances(nodes []*pb.Node) error {
+	NodesStore = nodes
+	for _, node := range nodes {
+		key := Key{
+			Row: node.Row,
+			Col: node.Col,
+		}
+		_, ok := CreatedNodes[key]
+		if !ok {
+			go createInstance(node.Row, node.Col)
+			CreatedNodes[key] = node
+		}
+	}
+	return nil
+}
+
+func createInstance(row, col int32) {
 	nodeName := fmt.Sprintf("r%vc%v", row, col)
 	command := fmt.Sprintf("gcloud compute instances create %v --image-family cos-stable --image-project cos-cloud --metadata-from-file user-data=infra/init --metadata=cos-metrics-enabled=true --zone=asia-northeast1-a --machine-type=e2-micro --project=factorio2022", nodeName)
 	log.Println(command)
@@ -24,14 +46,6 @@ func createInstance(row, col int32, nodeType string) error {
 			log.Println(string(ee.Stderr))
 		}
 	}
-
-	Nodes = append(Nodes, &pb.Node{
-		Type: nodeType,
-		Col:  col,
-		Row:  row,
-	})
-
-	return nil
 }
 
 func UpdateMap(conn *grpc.ClientConn) {
@@ -46,7 +60,7 @@ func Update(conn *grpc.ClientConn) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	r, err := c.UpdateMap(ctx, &pb.MapRequest{
-		Nodes: Nodes,
+		Nodes: NodesStore,
 	})
 	if err != nil {
 		log.Printf("could not update nodes: %v\n", err)

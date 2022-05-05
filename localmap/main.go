@@ -11,36 +11,43 @@ import (
 )
 
 type Type string
+type Direction string
 
 const (
 	MapServer = "34.84.65.135"
 
-	MINE Type = "MINE"
+	Up    Direction = "A"
+	Down  Direction = "V"
+	Left  Direction = "<"
+	Right Direction = ">"
+
+	IronMine Type = "MI"
 )
 
 func RunServer() {
-	conn, err := grpc.Dial(MapServer, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(MapServer+":8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	defer conn.Close()
 	go UpdateMap(conn)
 
-	http.HandleFunc("/add_node", func(w http.ResponseWriter, r *http.Request) {
-		node := pb.Node{}
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		var nodes []*pb.Node
 		data, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		err = json.Unmarshal(data, &node)
+		err = json.Unmarshal(data, &nodes)
 		if err != nil {
 			log.Println(err)
 			return
 		}
+		log.Println("Got data", nodes)
 
-		err = createInstance(node.Row, node.Col, node.Type)
+		err = syncInstances(nodes)
 		resp := ""
 		if err != nil {
 			log.Println(err)
@@ -54,8 +61,9 @@ func RunServer() {
 		}
 	})
 
-	http.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "index.html")
+	http.HandleFunc("/map", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Got request for index.")
+		http.ServeFile(w, r, "localmap/index.html")
 	})
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {

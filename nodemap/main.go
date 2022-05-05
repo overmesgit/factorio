@@ -42,7 +42,7 @@ func LogInput(ctx context.Context, in interface{}, logger *zap.SugaredLogger) {
 
 func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
 	LogInput(ctx, in, s.logger)
-	nodeMap := UpdateMap(in)
+	nodeMap := s.RunUpdateMap(in)
 	return &pb.MapReply{Nodes: nodeMap}, nil
 }
 

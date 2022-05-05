@@ -22,7 +22,7 @@ func main() {
 	defer cancel()
 	r, err := c.UpdateMap(ctx, &pb.MapRequest{Nodes: []*pb.Node{
 		{
-			Type:      "MINE",
+			Type:      "IronMine",
 			Col:       0,
 			Row:       0,
 			Ip:        "",

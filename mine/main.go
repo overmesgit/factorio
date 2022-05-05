@@ -14,6 +14,7 @@ import (
 )
 
 var MyType localmap.Type
+var MyDir localmap.Direction
 var AdjustedNodes []*pb.Node
 
 type server struct {

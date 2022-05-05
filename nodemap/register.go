@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/overmesgit/factorio/grpc"
 	pb "github.com/overmesgit/factorio/grpc"
-	"log"
 	"sync"
 )
 
@@ -65,7 +64,7 @@ func (s *server) GetAdjustedNodes(in *pb.IpRequest) []*pb.Node {
 	return resp
 }
 
-func UpdateMap(in *pb.MapRequest) []*pb.Node {
+func (s *server) RunUpdateMap(in *pb.MapRequest) []*pb.Node {
 	nodeMap.Lock()
 	defer nodeMap.Unlock()
 	for _, node := range in.GetNodes() {
@@ -75,11 +74,12 @@ func UpdateMap(in *pb.MapRequest) []*pb.Node {
 		}
 		if val, ok := nodeMap.nodes[k]; ok {
 			val.Type = node.Type
+			val.Direction = node.Direction
 		} else {
 			nodeMap.nodes[k] = node
 		}
 	}
-	log.Printf("UpdatedNodes: %v", nodeMap.nodes)
+	s.logger.Infof("UpdatedNodes: %v", nodeMap.nodes)
 
 	nodesList := make([]*pb.Node, 0)
 	for _, node := range nodeMap.nodes {

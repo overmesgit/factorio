@@ -46,7 +46,7 @@
             color: '#0a0a0a',
             font: {
                 name: 'Helvetica',
-                size: 6,
+                size: 8,
                 bold: false,
                 italic: false,
             },
@@ -54,11 +54,45 @@
     }
     xspread = x_spreadsheet('#xspreadsheet', options);
     xspread.change(data => {
-        console.log(data)
+        // console.log(data)
     });
 
+    async function sendData() {
+        let rows = xspread.getData()[0]['rows']
+        let respData = []
+        for (let row in rows) {
+            let cols = rows[row]
+            for (let col in cols.cells) {
+                let text = cols.cells[col]['text'];
+                let typeAndDir = text.split("\n")[0]
+                //→←↑↓
+                respData.push({
+                    row: +row,
+                    col: +col,
+                    type: typeAndDir.slice(0, 2),
+                    direction: typeAndDir.slice(-1)
+                })
+            }
+        }
+        console.log(respData)
+        const response = await fetch('/update_map', {
+            method: 'POST',
+            body: JSON.stringify(respData)
+        });
+        console.log(await response.text())
+
+        // cell = xspread.cell(5, 5)
+        // console.log(cell)
+        // if (cell) {
+        //     text = cell.text.split("\n")[0]
+        //     xspread.cellText(5, 5, text + "\n" + l).reRender();
+        // } else {
+        //     xspread.cellText(5, 5, "<p>hi</p>").reRender();
+        // }
+    }
+
     setInterval(() => {
-        xspread.cellText(5, 5, "Hello").reRender();
+        sendData();
     }, 1000)
 </script>
 
