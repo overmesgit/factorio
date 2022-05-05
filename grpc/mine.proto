@@ -1,5 +1,6 @@
 syntax = "proto3";
 
+import "map.proto";
 option go_package = "factorio/grpc";
 
 package grpc;
@@ -9,7 +10,7 @@ service Mine {
 }
 
 message ItemRequest {
-  string type = 1;
+  Item item = 1;
 }
 
 message ItemReply {

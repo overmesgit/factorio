@@ -2,20 +2,24 @@ package mine
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
 	"github.com/overmesgit/factorio/localmap"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/credentials/insecure"
+	"sync"
 
 	"google.golang.org/grpc"
 	"log"
 	"net"
 )
 
-var MyType localmap.Type
-var MyDir localmap.Direction
-var MyItems = make(map[localmap.ItemType]*pb.Item)
+var MyNode *pb.Node
+var MyItems struct {
+	items map[localmap.ItemType]*pb.Item
+	sync.Mutex
+}
 
 var AdjustedNodes []*pb.Node
 
@@ -25,10 +29,24 @@ type server struct {
 }
 
 func (s *server) SendResource(ctx context.Context, request *pb.ItemRequest) (*pb.ItemReply, error) {
-	panic("implement me")
+	MyItems.Lock()
+	defer MyItems.Unlock()
+	localStore, ok := MyItems.items[localmap.ItemType(request.Item.Type)]
+	if !ok {
+		MyItems.items[localmap.ItemType(request.Item.Type)] = request.Item
+	} else {
+		if localStore.Count < 100 {
+			localStore.Count += request.Item.Count
+		} else {
+			return nil, errors.New("don't have space")
+		}
+	}
+	return &pb.ItemReply{}, nil
 }
 
 func RunServer() {
+	MyItems.items = map[localmap.ItemType]*pb.Item{}
+
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 

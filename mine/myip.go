@@ -3,7 +3,6 @@ package mine
 import (
 	"context"
 	pb "github.com/overmesgit/factorio/grpc"
-	"github.com/overmesgit/factorio/localmap"
 	"google.golang.org/grpc"
 	"io"
 	"net/http"
@@ -97,7 +96,7 @@ func (s *server) RegisterInMapServer(conn *grpc.ClientConn, ip string, name stri
 	defer cancel()
 
 	itemsList := make([]*pb.Item, 0)
-	for _, item := range MyItems {
+	for _, item := range MyItems.items {
 		itemsList = append(itemsList, item)
 	}
 	r, err := c.NotifyIp(ctx, &pb.IpRequest{
@@ -114,10 +113,14 @@ func (s *server) RegisterInMapServer(conn *grpc.ClientConn, ip string, name stri
 
 	AdjustedNodes = r.GetAdjustedNodes()
 	for _, node := range AdjustedNodes {
-		if node.Row == row && node.Col == col && MyType != localmap.Type(node.Type) {
-			MyType = localmap.Type(node.Type)
-			MyDir = localmap.Direction(node.Direction)
-			s.logger.Infof("Set my type: %s %s\n", MyType, MyDir)
+		if node.Row == row && node.Col == col {
+			if MyNode == nil {
+				MyNode = node
+			} else {
+				MyNode.Type = node.Type
+				MyNode.Direction = node.Direction
+			}
+			s.logger.Infof("Set my type: %v\n", MyNode)
 		}
 	}
 }

@@ -22,6 +22,7 @@ const (
 	Right Direction = ">"
 
 	IronMine Type = "MI"
+	Belt     Type = "BE"
 )
 
 type ItemType string
