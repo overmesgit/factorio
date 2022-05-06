@@ -6,6 +6,7 @@ import (
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
 	"github.com/overmesgit/factorio/localmap"
+	"github.com/overmesgit/factorio/nodemap"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/credentials/insecure"
 	"sync"
@@ -29,17 +30,21 @@ type server struct {
 }
 
 func (s *server) SendResource(ctx context.Context, request *pb.ItemRequest) (*pb.ItemReply, error) {
+	nodemap.LogInput(ctx, "SendResource", request, s.logger)
+
 	MyItems.Lock()
 	defer MyItems.Unlock()
 	localStore, ok := MyItems.items[localmap.ItemType(request.Item.Type)]
 	if !ok {
 		MyItems.items[localmap.ItemType(request.Item.Type)] = request.Item
+		return &pb.ItemReply{}, nil
+
+	}
+
+	if localStore.Count < 100 {
+		localStore.Count += request.Item.Count
 	} else {
-		if localStore.Count < 100 {
-			localStore.Count += request.Item.Count
-		} else {
-			return nil, errors.New("don't have space")
-		}
+		return nil, errors.New("don't have space")
 	}
 	return &pb.ItemReply{}, nil
 }

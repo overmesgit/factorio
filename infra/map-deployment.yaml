@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: map-dep
+  labels:
+    app: map
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: map
+  strategy:
+    type:
+      Recreate
+  template:
+    metadata:
+      labels:
+        app: map
+    spec:
+      containers:
+        - name: map
+          image: gcr.io/factorio2022/map:dev
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+              ephemeral-storage: "100Mi"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+              ephemeral-storage: "100Mi"
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: volume1
+              mountPath: /mnt/data
+      volumes:
+        - name: volume1
+          persistentVolumeClaim:
+            claimName: volumeclaim1

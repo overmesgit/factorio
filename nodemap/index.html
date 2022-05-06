@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Map</title>
+    <style>
+
+        :root {
+            --columns: 50;
+            --rows: 50;
+        }
+
+        .head-container {
+            display: grid;
+            gap: 5px 5px;
+            justify-items: center;
+            grid-template-columns: repeat(var(--columns), 40px);
+            grid-template-rows: 20px;
+            margin-left: 20px;
+        }
+
+        .left-container {
+            float: left;
+            display: grid;
+            gap: 5px 5px;
+            justify-items: center;
+            grid-template-columns: 20px;
+            grid-template-rows: repeat(var(--rows), 40px);
+        }
+
+        .map-container {
+            display: grid;
+            gap: 5px 5px;
+            grid-template-columns: repeat(var(--columns), 40px);
+            grid-template-rows: repeat(var(--rows), 40px);
+        }
+
+        .map-item {
+            width: 30px;
+            height: 15px;
+        }
+
+        /*body {*/
+        /*    cursor: url(http://www.javascriptkit.com/dhtmltutors/cursor-hand.gif), auto;*/
+        /*    transform: rotate(30deg);*/
+        /*}*/
+
+    </style>
+    <script>
+        var MapData = JSON.parse({{.Data}})
+    </script>
+
+
+</head>
+<body>
+<div id="header" class="head-container"></div>
+<div id="left" class="left-container"></div>
+<div id="data" class="map-container"></div>
+
+
+<script>
+    let header = document.getElementById("header");
+    let left = document.getElementById("left");
+    for (let col = 0; col < 50; col++) {
+        let newEl = document.createElement('div')
+        newEl.innerHTML = col;
+        header.append(newEl);
+        let rowEl = document.createElement('div')
+        rowEl.innerHTML = col;
+        left.append(rowEl);
+    }
+
+    let data = document.getElementById("data");
+    for (let row = 0; row < 50; row++) {
+        for (let col = 0; col < 50; col++) {
+            let newEl = document.createElement('div')
+            newEl.innerHTML = '<input placeholder=" " class="map-item" data-row=" ' + row + ' " data-col="' + col + '"  />';
+            newEl.classList.add('item')
+            newEl.classList.add('col' + col)
+            newEl.classList.add('row' + row)
+            newEl.onchange = onChange;
+            data.append(newEl)
+        }
+    }
+    if (MapData) {
+        for (let node of MapData) {
+            let cell = document.querySelector('.col'+node.col+'.row'+node.row + '>input')
+            cell.value = node.type + ':' + node.direction
+        }
+    }
+
+    function onChange(event) {
+        let target = event.target;
+        console.log(event, target.value, target.dataset)
+    }
+
+    async function sendData() {
+        let nodesEl = document.querySelectorAll('input:not(:placeholder-shown)')
+
+        let nodes = []
+        for (let node of nodesEl) {
+            let typeAndDir = node.value
+            let data = node.dataset
+            nodes.push({
+                col: +data.col,
+                row: +data.row,
+                type: typeAndDir.slice(0, 2),
+                direction: typeAndDir.slice(-1)
+            })
+        }
+        console.log("data for send", nodes)
+        const response = await fetch('/update', {
+            method: 'POST',
+            body: JSON.stringify(nodes)
+        });
+        let data = await response.json();
+        console.log("resp from server", data)
+    }
+    setInterval(() => {
+        sendData();
+    }, 1000)
+
+</script>
+
+</body>
+</html>

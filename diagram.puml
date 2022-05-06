@@ -3,36 +3,39 @@
 
 package "Local" {
   [LocalMachine]
+  component A [
+  ]
 }
 
 package "Map" {
-  GRPC_MAP - [Map]
+  [MAP]
+
+  database "Map File" {
+  }
+  component A [
+  1. Store node MAP in filesystem.
+  2. Get nodes update from frontend.
+  3. Serve frontend.
+
+  1. Create new nodes.
+  2. Store nodes ip addresses/state.
+  3. Serve adjusted_nodes endpoint.
+  ]
 }
+
+LocalMachine <--> MAP : working with map
 
 package "Mine" {
-  GRPC_MINE - [MINE]
+  [MINE]
 }
 
-package "Mine2" {
-  GRPC_MINE2 - [MINE2]
+package "AdjNextMine" {
+  [MINE2]
 }
 
+MINE --> MAP : Send Internal State
+MINE <-- MAP : Get Adj Nodes
 
-[LocalMachine] ---> [GRPC_MAP]
-[GRPC_MINE] -> [GRPC_MAP]
-[GRPC_MINE2] -> [GRPC_MAP]
-
-legend
-1. User creates node and send to Map.
-2. Node connects to Map and send Ip, Updated Items, gets Node type, gets next nodes.
-3. Node produces send item to next node if it can.
-end legend
-
-
-'cloud {
-'}
-'
-'database "MySql" {
-'}
+MINE --> MINE2 : Send Item
 
 @enduml

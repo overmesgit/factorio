@@ -1,7 +1,9 @@
 package main
 
-import "github.com/overmesgit/factorio/localmap"
+import (
+	"github.com/overmesgit/factorio/nodemap"
+)
 
 func main() {
-	localmap.RunServer()
+	nodemap.RunHttpServer()
 }
