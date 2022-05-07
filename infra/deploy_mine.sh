@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 TAG="gcr.io/factorio2022/mine:$(date +%Y%m%d%H%M%S)"
 docker build -f infra/Dockerfile_mine -t "$TAG" .

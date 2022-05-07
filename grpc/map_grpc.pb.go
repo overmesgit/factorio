@@ -22,8 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MapClient interface {
-	NotifyIp(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*IpReply, error)
-	UpdateMap(ctx context.Context, in *MapRequest, opts ...grpc.CallOption) (*MapReply, error)
+	UpdateNodeState(ctx context.Context, in *NodeState, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type mapClient struct {
@@ -34,18 +33,9 @@ func NewMapClient(cc grpc.ClientConnInterface) MapClient {
 	return &mapClient{cc}
 }
 
-func (c *mapClient) NotifyIp(ctx context.Context, in *IpRequest, opts ...grpc.CallOption) (*IpReply, error) {
-	out := new(IpReply)
-	err := c.cc.Invoke(ctx, "/grpc.Map/notifyIp", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *mapClient) UpdateMap(ctx context.Context, in *MapRequest, opts ...grpc.CallOption) (*MapReply, error) {
-	out := new(MapReply)
-	err := c.cc.Invoke(ctx, "/grpc.Map/updateMap", in, out, opts...)
+func (c *mapClient) UpdateNodeState(ctx context.Context, in *NodeState, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/grpc.Map/updateNodeState", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +46,7 @@ func (c *mapClient) UpdateMap(ctx context.Context, in *MapRequest, opts ...grpc.
 // All implementations must embed UnimplementedMapServer
 // for forward compatibility
 type MapServer interface {
-	NotifyIp(context.Context, *IpRequest) (*IpReply, error)
-	UpdateMap(context.Context, *MapRequest) (*MapReply, error)
+	UpdateNodeState(context.Context, *NodeState) (*Empty, error)
 	mustEmbedUnimplementedMapServer()
 }
 
@@ -65,11 +54,8 @@ type MapServer interface {
 type UnimplementedMapServer struct {
 }
 
-func (UnimplementedMapServer) NotifyIp(context.Context, *IpRequest) (*IpReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method NotifyIp not implemented")
-}
-func (UnimplementedMapServer) UpdateMap(context.Context, *MapRequest) (*MapReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateMap not implemented")
+func (UnimplementedMapServer) UpdateNodeState(context.Context, *NodeState) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateNodeState not implemented")
 }
 func (UnimplementedMapServer) mustEmbedUnimplementedMapServer() {}
 
@@ -84,38 +70,20 @@ func RegisterMapServer(s grpc.ServiceRegistrar, srv MapServer) {
 	s.RegisterService(&Map_ServiceDesc, srv)
 }
 
-func _Map_NotifyIp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IpRequest)
+func _Map_UpdateNodeState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NodeState)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MapServer).NotifyIp(ctx, in)
+		return srv.(MapServer).UpdateNodeState(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Map/notifyIp",
+		FullMethod: "/grpc.Map/updateNodeState",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MapServer).NotifyIp(ctx, req.(*IpRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Map_UpdateMap_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MapRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MapServer).UpdateMap(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc.Map/updateMap",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MapServer).UpdateMap(ctx, req.(*MapRequest))
+		return srv.(MapServer).UpdateNodeState(ctx, req.(*NodeState))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,12 +96,8 @@ var Map_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MapServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "notifyIp",
-			Handler:    _Map_NotifyIp_Handler,
-		},
-		{
-			MethodName: "updateMap",
-			Handler:    _Map_UpdateMap_Handler,
+			MethodName: "updateNodeState",
+			Handler:    _Map_UpdateNodeState_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

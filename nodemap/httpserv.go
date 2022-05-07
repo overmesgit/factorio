@@ -22,11 +22,20 @@ func RunHttpServer() {
 			sugar.Error(err)
 			return
 		}
-
+		sugar.Infof("Got data %v", nodes)
 		updatedNodes(nodes)
 
-		sugar.Infof("Got data %v", nodes)
-		_, err = w.Write([]byte("{}"))
+		var reply []*pb.NodeState
+		for _, n := range mapItems.nodes {
+			reply = append(reply, n)
+		}
+
+		mapItems, err := json.Marshal(reply)
+		if err != nil {
+			sugar.Error(err)
+			return
+		}
+		_, err = w.Write(mapItems)
 		if err != nil {
 			sugar.Error(err)
 		}
@@ -56,7 +65,7 @@ func RunHttpServer() {
 		}
 
 		var arr []*pb.Node
-		for _, node := range nodeMap.nodes {
+		for _, node := range mapNodes.nodes {
 			arr = append(arr, node)
 		}
 
@@ -84,7 +93,7 @@ func updatedNodes(nodes []*pb.Node) {
 			col: node.Col,
 		}
 
-		if exist, ok := nodeMap.nodes[key]; !ok {
+		if exist, ok := mapNodes.nodes[key]; !ok {
 			createPod(node)
 		} else {
 			if exist.Type != node.Type || exist.Direction != node.Direction {
@@ -93,12 +102,12 @@ func updatedNodes(nodes []*pb.Node) {
 		}
 
 		seenKey[key] = struct{}{}
-		nodeMap.nodes[key] = node
+		mapNodes.nodes[key] = node
 	}
 
-	for k := range nodeMap.nodes {
+	for k := range mapNodes.nodes {
 		if _, ok := seenKey[k]; !ok {
-			delete(nodeMap.nodes, k)
+			delete(mapNodes.nodes, k)
 			go deletePod(k.row, k.col)
 		}
 	}

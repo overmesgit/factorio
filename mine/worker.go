@@ -1,7 +1,6 @@
 package mine
 
 import (
-	pb "github.com/overmesgit/factorio/grpc"
 	"github.com/overmesgit/factorio/nodemap"
 	"time"
 )
@@ -12,41 +11,24 @@ func (s *server) RunWorker() {
 }
 
 func (s *server) DoWork() {
+	var err error
 	for {
 		time.Sleep(time.Second)
-		if MyNode == nil {
-			s.logger.Infof("Waiting for my node %v\n", MyNode)
-			continue
-		}
-
-		s.logger.Infof("Do work %v\n", MyNode)
+		sugar.Infof("Do work %v\n", MyNode)
+		err = nil
 
 		switch nodemap.Type(MyNode.Type) {
 		case nodemap.IronMine:
-			s.ironMine()
+			err = s.ironMine()
 		default:
 
 		}
+
+		sugar.Infof("After work. Err %v LocalStore %v", err, MyStorage.GetItemCount())
+
 	}
 }
 
-func (s *server) ironMine() {
-	mineType := nodemap.Iron
-
-	MyItems.Lock()
-	defer MyItems.Unlock()
-
-	localStore, ok := MyItems.items[mineType]
-	if !ok {
-		localStore = &pb.Item{
-			Type:  string(mineType),
-			Count: 0,
-		}
-		MyItems.items[mineType] = localStore
-	}
-
-	if localStore.Count < 100 {
-		localStore.Count++
-	}
-	s.logger.Infof("IronMine. Dig. LocalStore %v\n", localStore)
+func (s *server) ironMine() error {
+	return MyStorage.Add(nodemap.Iron)
 }

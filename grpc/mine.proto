@@ -6,12 +6,6 @@ option go_package = "factorio/grpc";
 package grpc;
 
 service Mine {
-  rpc sendResource (ItemRequest) returns (ItemReply) {}
-}
-
-message ItemRequest {
-  Item item = 1;
-}
-
-message ItemReply {
+  rpc sendResource (Item) returns (Empty) {}
+  rpc giveResource (Item) returns (Item) {}
 }

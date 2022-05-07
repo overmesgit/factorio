@@ -20,24 +20,59 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type Empty struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *Empty) Reset() {
+	*x = Empty{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_map_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Empty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Empty) ProtoMessage() {}
+
+func (x *Empty) ProtoReflect() protoreflect.Message {
+	mi := &file_map_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
+func (*Empty) Descriptor() ([]byte, []int) {
+	return file_map_proto_rawDescGZIP(), []int{0}
+}
+
 type Node struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type  string  `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	Col   int32   `protobuf:"varint,2,opt,name=col,proto3" json:"col,omitempty"`
-	Row   int32   `protobuf:"varint,3,opt,name=row,proto3" json:"row,omitempty"`
-	Ip    string  `protobuf:"bytes,4,opt,name=ip,proto3" json:"ip,omitempty"`
-	Items []*Item `protobuf:"bytes,5,rep,name=items,proto3" json:"items,omitempty"`
-	//→←↑↓
-	Direction string `protobuf:"bytes,6,opt,name=direction,proto3" json:"direction,omitempty"`
+	Type      string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Col       int32  `protobuf:"varint,2,opt,name=col,proto3" json:"col,omitempty"`
+	Row       int32  `protobuf:"varint,3,opt,name=row,proto3" json:"row,omitempty"`
+	Direction string `protobuf:"bytes,4,opt,name=direction,proto3" json:"direction,omitempty"`
 }
 
 func (x *Node) Reset() {
 	*x = Node{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_map_proto_msgTypes[0]
+		mi := &file_map_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -50,7 +85,7 @@ func (x *Node) String() string {
 func (*Node) ProtoMessage() {}
 
 func (x *Node) ProtoReflect() protoreflect.Message {
-	mi := &file_map_proto_msgTypes[0]
+	mi := &file_map_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -63,7 +98,7 @@ func (x *Node) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Node.ProtoReflect.Descriptor instead.
 func (*Node) Descriptor() ([]byte, []int) {
-	return file_map_proto_rawDescGZIP(), []int{0}
+	return file_map_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Node) GetType() string {
@@ -87,20 +122,6 @@ func (x *Node) GetRow() int32 {
 	return 0
 }
 
-func (x *Node) GetIp() string {
-	if x != nil {
-		return x.Ip
-	}
-	return ""
-}
-
-func (x *Node) GetItems() []*Item {
-	if x != nil {
-		return x.Items
-	}
-	return nil
-}
-
 func (x *Node) GetDirection() string {
 	if x != nil {
 		return x.Direction
@@ -108,7 +129,62 @@ func (x *Node) GetDirection() string {
 	return ""
 }
 
-type Item struct {
+type NodeState struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Node  *Node          `protobuf:"bytes,1,opt,name=node,proto3" json:"node,omitempty"`
+	Items []*ItemCounter `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+}
+
+func (x *NodeState) Reset() {
+	*x = NodeState{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_map_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *NodeState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodeState) ProtoMessage() {}
+
+func (x *NodeState) ProtoReflect() protoreflect.Message {
+	mi := &file_map_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodeState.ProtoReflect.Descriptor instead.
+func (*NodeState) Descriptor() ([]byte, []int) {
+	return file_map_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *NodeState) GetNode() *Node {
+	if x != nil {
+		return x.Node
+	}
+	return nil
+}
+
+func (x *NodeState) GetItems() []*ItemCounter {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ItemCounter struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -117,10 +193,64 @@ type Item struct {
 	Count int64  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
 }
 
+func (x *ItemCounter) Reset() {
+	*x = ItemCounter{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_map_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ItemCounter) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ItemCounter) ProtoMessage() {}
+
+func (x *ItemCounter) ProtoReflect() protoreflect.Message {
+	mi := &file_map_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ItemCounter.ProtoReflect.Descriptor instead.
+func (*ItemCounter) Descriptor() ([]byte, []int) {
+	return file_map_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ItemCounter) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *ItemCounter) GetCount() int64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+type Item struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Type string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+}
+
 func (x *Item) Reset() {
 	*x = Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_map_proto_msgTypes[1]
+		mi := &file_map_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -133,7 +263,7 @@ func (x *Item) String() string {
 func (*Item) ProtoMessage() {}
 
 func (x *Item) ProtoReflect() protoreflect.Message {
-	mi := &file_map_proto_msgTypes[1]
+	mi := &file_map_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -146,7 +276,7 @@ func (x *Item) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Item.ProtoReflect.Descriptor instead.
 func (*Item) Descriptor() ([]byte, []int) {
-	return file_map_proto_rawDescGZIP(), []int{1}
+	return file_map_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Item) GetType() string {
@@ -156,188 +286,16 @@ func (x *Item) GetType() string {
 	return ""
 }
 
-func (x *Item) GetCount() int64 {
-	if x != nil {
-		return x.Count
-	}
-	return 0
-}
-
-type IpRequest struct {
+type ItemList struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Ip    string  `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
-	Col   int32   `protobuf:"varint,2,opt,name=col,proto3" json:"col,omitempty"`
-	Row   int32   `protobuf:"varint,3,opt,name=row,proto3" json:"row,omitempty"`
 	Items []*Item `protobuf:"bytes,5,rep,name=items,proto3" json:"items,omitempty"`
 }
 
-func (x *IpRequest) Reset() {
-	*x = IpRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_map_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *IpRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IpRequest) ProtoMessage() {}
-
-func (x *IpRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_map_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IpRequest.ProtoReflect.Descriptor instead.
-func (*IpRequest) Descriptor() ([]byte, []int) {
-	return file_map_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *IpRequest) GetIp() string {
-	if x != nil {
-		return x.Ip
-	}
-	return ""
-}
-
-func (x *IpRequest) GetCol() int32 {
-	if x != nil {
-		return x.Col
-	}
-	return 0
-}
-
-func (x *IpRequest) GetRow() int32 {
-	if x != nil {
-		return x.Row
-	}
-	return 0
-}
-
-func (x *IpRequest) GetItems() []*Item {
-	if x != nil {
-		return x.Items
-	}
-	return nil
-}
-
-type IpReply struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	AdjustedNodes []*Node `protobuf:"bytes,1,rep,name=adjusted_nodes,json=adjustedNodes,proto3" json:"adjusted_nodes,omitempty"`
-}
-
-func (x *IpReply) Reset() {
-	*x = IpReply{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_map_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *IpReply) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IpReply) ProtoMessage() {}
-
-func (x *IpReply) ProtoReflect() protoreflect.Message {
-	mi := &file_map_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IpReply.ProtoReflect.Descriptor instead.
-func (*IpReply) Descriptor() ([]byte, []int) {
-	return file_map_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *IpReply) GetAdjustedNodes() []*Node {
-	if x != nil {
-		return x.AdjustedNodes
-	}
-	return nil
-}
-
-type MapRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Nodes []*Node `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
-}
-
-func (x *MapRequest) Reset() {
-	*x = MapRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_map_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *MapRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MapRequest) ProtoMessage() {}
-
-func (x *MapRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_map_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MapRequest.ProtoReflect.Descriptor instead.
-func (*MapRequest) Descriptor() ([]byte, []int) {
-	return file_map_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *MapRequest) GetNodes() []*Node {
-	if x != nil {
-		return x.Nodes
-	}
-	return nil
-}
-
-type MapReply struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Nodes []*Node `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
-}
-
-func (x *MapReply) Reset() {
-	*x = MapReply{}
+func (x *ItemList) Reset() {
+	*x = ItemList{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_map_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -345,13 +303,13 @@ func (x *MapReply) Reset() {
 	}
 }
 
-func (x *MapReply) String() string {
+func (x *ItemList) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MapReply) ProtoMessage() {}
+func (*ItemList) ProtoMessage() {}
 
-func (x *MapReply) ProtoReflect() protoreflect.Message {
+func (x *ItemList) ProtoReflect() protoreflect.Message {
 	mi := &file_map_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -363,12 +321,59 @@ func (x *MapReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MapReply.ProtoReflect.Descriptor instead.
-func (*MapReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use ItemList.ProtoReflect.Descriptor instead.
+func (*ItemList) Descriptor() ([]byte, []int) {
 	return file_map_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *MapReply) GetNodes() []*Node {
+func (x *ItemList) GetItems() []*Item {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type NodesList struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Nodes []*Node `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
+}
+
+func (x *NodesList) Reset() {
+	*x = NodesList{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_map_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *NodesList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodesList) ProtoMessage() {}
+
+func (x *NodesList) ProtoReflect() protoreflect.Message {
+	mi := &file_map_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodesList.ProtoReflect.Descriptor instead.
+func (*NodesList) Descriptor() ([]byte, []int) {
+	return file_map_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *NodesList) GetNodes() []*Node {
 	if x != nil {
 		return x.Nodes
 	}
@@ -379,43 +384,35 @@ var File_map_proto protoreflect.FileDescriptor
 
 var file_map_proto_rawDesc = []byte{
 	0x0a, 0x09, 0x6d, 0x61, 0x70, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x04, 0x67, 0x72, 0x70,
-	0x63, 0x22, 0x8e, 0x01, 0x0a, 0x04, 0x4e, 0x6f, 0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79,
-	0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x10,
-	0x0a, 0x03, 0x63, 0x6f, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x63, 0x6f, 0x6c,
-	0x12, 0x10, 0x0a, 0x03, 0x72, 0x6f, 0x77, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x72,
-	0x6f, 0x77, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02,
-	0x69, 0x70, 0x12, 0x20, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28,
-	0x0b, 0x32, 0x0a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69,
-	0x74, 0x65, 0x6d, 0x73, 0x12, 0x1c, 0x0a, 0x09, 0x64, 0x69, 0x72, 0x65, 0x63, 0x74, 0x69, 0x6f,
-	0x6e, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x64, 0x69, 0x72, 0x65, 0x63, 0x74, 0x69,
-	0x6f, 0x6e, 0x22, 0x30, 0x0a, 0x04, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79,
-	0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x14,
-	0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x63,
-	0x6f, 0x75, 0x6e, 0x74, 0x22, 0x61, 0x0a, 0x09, 0x49, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69,
-	0x70, 0x12, 0x10, 0x0a, 0x03, 0x63, 0x6f, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03,
-	0x63, 0x6f, 0x6c, 0x12, 0x10, 0x0a, 0x03, 0x72, 0x6f, 0x77, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05,
-	0x52, 0x03, 0x72, 0x6f, 0x77, 0x12, 0x20, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x05,
-	0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x49, 0x74, 0x65, 0x6d,
-	0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x3c, 0x0a, 0x07, 0x49, 0x70, 0x52, 0x65, 0x70,
-	0x6c, 0x79, 0x12, 0x31, 0x0a, 0x0e, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64, 0x5f, 0x6e,
-	0x6f, 0x64, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x67, 0x72, 0x70,
-	0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x52, 0x0d, 0x61, 0x64, 0x6a, 0x75, 0x73, 0x74, 0x65, 0x64,
-	0x4e, 0x6f, 0x64, 0x65, 0x73, 0x22, 0x2e, 0x0a, 0x0a, 0x4d, 0x61, 0x70, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x20, 0x0a, 0x05, 0x6e, 0x6f, 0x64, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03,
-	0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x52, 0x05,
-	0x6e, 0x6f, 0x64, 0x65, 0x73, 0x22, 0x2c, 0x0a, 0x08, 0x4d, 0x61, 0x70, 0x52, 0x65, 0x70, 0x6c,
-	0x79, 0x12, 0x20, 0x0a, 0x05, 0x6e, 0x6f, 0x64, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b,
-	0x32, 0x0a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x52, 0x05, 0x6e, 0x6f,
-	0x64, 0x65, 0x73, 0x32, 0x64, 0x0a, 0x03, 0x4d, 0x61, 0x70, 0x12, 0x2c, 0x0a, 0x08, 0x6e, 0x6f,
-	0x74, 0x69, 0x66, 0x79, 0x49, 0x70, 0x12, 0x0f, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x49, 0x70,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0d, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x49,
-	0x70, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x12, 0x2f, 0x0a, 0x09, 0x75, 0x70, 0x64, 0x61,
-	0x74, 0x65, 0x4d, 0x61, 0x70, 0x12, 0x10, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x4d, 0x61, 0x70,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x4d,
-	0x61, 0x70, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x00, 0x42, 0x0f, 0x5a, 0x0d, 0x66, 0x61, 0x63,
-	0x74, 0x6f, 0x72, 0x69, 0x6f, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x63, 0x22, 0x07, 0x0a, 0x05, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x5c, 0x0a, 0x04, 0x4e, 0x6f,
+	0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x63, 0x6f, 0x6c, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x03, 0x63, 0x6f, 0x6c, 0x12, 0x10, 0x0a, 0x03, 0x72, 0x6f, 0x77, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x72, 0x6f, 0x77, 0x12, 0x1c, 0x0a, 0x09, 0x64, 0x69,
+	0x72, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x64,
+	0x69, 0x72, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x54, 0x0a, 0x09, 0x4e, 0x6f, 0x64, 0x65,
+	0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x1e, 0x0a, 0x04, 0x6e, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x52,
+	0x04, 0x6e, 0x6f, 0x64, 0x65, 0x12, 0x27, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x02,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x49, 0x74, 0x65, 0x6d,
+	0x43, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x37,
+	0x0a, 0x0b, 0x49, 0x74, 0x65, 0x6d, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x65, 0x72, 0x12, 0x12, 0x0a,
+	0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70,
+	0x65, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x1a, 0x0a, 0x04, 0x49, 0x74, 0x65, 0x6d, 0x12,
+	0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74,
+	0x79, 0x70, 0x65, 0x22, 0x2c, 0x0a, 0x08, 0x49, 0x74, 0x65, 0x6d, 0x4c, 0x69, 0x73, 0x74, 0x12,
+	0x20, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a,
+	0x2e, 0x67, 0x72, 0x70, 0x63, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d,
+	0x73, 0x22, 0x2d, 0x0a, 0x09, 0x4e, 0x6f, 0x64, 0x65, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x20,
+	0x0a, 0x05, 0x6e, 0x6f, 0x64, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a, 0x2e,
+	0x67, 0x72, 0x70, 0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x52, 0x05, 0x6e, 0x6f, 0x64, 0x65, 0x73,
+	0x32, 0x38, 0x0a, 0x03, 0x4d, 0x61, 0x70, 0x12, 0x31, 0x0a, 0x0f, 0x75, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x0f, 0x2e, 0x67, 0x72, 0x70,
+	0x63, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x1a, 0x0b, 0x2e, 0x67, 0x72,
+	0x70, 0x63, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x42, 0x0f, 0x5a, 0x0d, 0x66, 0x61,
+	0x63, 0x74, 0x6f, 0x72, 0x69, 0x6f, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -430,30 +427,28 @@ func file_map_proto_rawDescGZIP() []byte {
 	return file_map_proto_rawDescData
 }
 
-var file_map_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_map_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_map_proto_goTypes = []interface{}{
-	(*Node)(nil),       // 0: grpc.Node
-	(*Item)(nil),       // 1: grpc.Item
-	(*IpRequest)(nil),  // 2: grpc.IpRequest
-	(*IpReply)(nil),    // 3: grpc.IpReply
-	(*MapRequest)(nil), // 4: grpc.MapRequest
-	(*MapReply)(nil),   // 5: grpc.MapReply
+	(*Empty)(nil),       // 0: grpc.Empty
+	(*Node)(nil),        // 1: grpc.Node
+	(*NodeState)(nil),   // 2: grpc.NodeState
+	(*ItemCounter)(nil), // 3: grpc.ItemCounter
+	(*Item)(nil),        // 4: grpc.Item
+	(*ItemList)(nil),    // 5: grpc.ItemList
+	(*NodesList)(nil),   // 6: grpc.NodesList
 }
 var file_map_proto_depIdxs = []int32{
-	1, // 0: grpc.Node.items:type_name -> grpc.Item
-	1, // 1: grpc.IpRequest.items:type_name -> grpc.Item
-	0, // 2: grpc.IpReply.adjusted_nodes:type_name -> grpc.Node
-	0, // 3: grpc.MapRequest.nodes:type_name -> grpc.Node
-	0, // 4: grpc.MapReply.nodes:type_name -> grpc.Node
-	2, // 5: grpc.Map.notifyIp:input_type -> grpc.IpRequest
-	4, // 6: grpc.Map.updateMap:input_type -> grpc.MapRequest
-	3, // 7: grpc.Map.notifyIp:output_type -> grpc.IpReply
-	5, // 8: grpc.Map.updateMap:output_type -> grpc.MapReply
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	1, // 0: grpc.NodeState.node:type_name -> grpc.Node
+	3, // 1: grpc.NodeState.items:type_name -> grpc.ItemCounter
+	4, // 2: grpc.ItemList.items:type_name -> grpc.Item
+	1, // 3: grpc.NodesList.nodes:type_name -> grpc.Node
+	2, // 4: grpc.Map.updateNodeState:input_type -> grpc.NodeState
+	0, // 5: grpc.Map.updateNodeState:output_type -> grpc.Empty
+	5, // [5:6] is the sub-list for method output_type
+	4, // [4:5] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_map_proto_init() }
@@ -463,7 +458,7 @@ func file_map_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_map_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Node); i {
+			switch v := v.(*Empty); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -475,7 +470,7 @@ func file_map_proto_init() {
 			}
 		}
 		file_map_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Item); i {
+			switch v := v.(*Node); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -487,7 +482,7 @@ func file_map_proto_init() {
 			}
 		}
 		file_map_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IpRequest); i {
+			switch v := v.(*NodeState); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -499,7 +494,7 @@ func file_map_proto_init() {
 			}
 		}
 		file_map_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IpReply); i {
+			switch v := v.(*ItemCounter); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -511,7 +506,7 @@ func file_map_proto_init() {
 			}
 		}
 		file_map_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MapRequest); i {
+			switch v := v.(*Item); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -523,7 +518,19 @@ func file_map_proto_init() {
 			}
 		}
 		file_map_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MapReply); i {
+			switch v := v.(*ItemList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_map_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*NodesList); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -541,7 +548,7 @@ func file_map_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_map_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

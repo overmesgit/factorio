@@ -5,8 +5,8 @@ option go_package = "factorio/grpc";
 package grpc;
 
 service Map {
-  rpc updateNodeState (StateRequest) returns (Empty) {}
-  rpc GetAdjustedNodes (Empty) returns (NodesList) {}
+  rpc updateNodeState (NodeState) returns (Empty) {}
+//  rpc GetAdjustedNodes (Empty) returns (NodesList) {}
 //  rpc updateMap (NodesList) returns (Empty) {}
 //  rpc getMap (Empty) returns (NodesList) {}
 }
@@ -14,25 +14,28 @@ service Map {
 message Empty {
 }
 
-message NodeInfo {
+message Node {
   string type = 1;
   int32 col = 2;
   int32 row = 3;
-  string ip = 4;
-  // →←↑↓
-  string direction = 6;
+  string direction = 4;
 }
 
-message Node {
-  NodeInfo node = 1;
-  repeated Item items = 2;
+message NodeState {
+  Node node = 1;
+  repeated ItemCounter items = 2;
+}
+
+message ItemCounter {
+  string type = 1;
+  int64 count = 2;
 }
 
 message Item {
   string type = 1;
 }
 
-message StateRequest {
+message ItemList {
   repeated Item items = 5;
 }
 

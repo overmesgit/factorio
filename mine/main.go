@@ -2,72 +2,75 @@ package mine
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
 	"github.com/overmesgit/factorio/nodemap"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/credentials/insecure"
-	"sync"
-
 	"google.golang.org/grpc"
-	"log"
 	"net"
+	"os"
+	"strconv"
 )
 
-var MyNode *pb.Node
-var MyItems struct {
-	items map[nodemap.ItemType]*pb.Item
-	sync.Mutex
+var sugar *zap.SugaredLogger
+
+func init() {
+	logger, _ := zap.NewProduction()
+	sugar = logger.Sugar()
+
+	col, err := strconv.Atoi(os.Getenv("COL"))
+	if err != nil {
+		panic(err)
+	}
+	row, err := strconv.Atoi(os.Getenv("ROW"))
+	if err != nil {
+		panic(err)
+	}
+	MyNode = &pb.Node{
+		Type:      os.Getenv("TYPE"),
+		Col:       int32(col),
+		Row:       int32(row),
+		Direction: os.Getenv("DIRECTION"),
+	}
 }
 
-var AdjustedNodes []*pb.Node
+var MyNode *pb.Node
 
 type server struct {
 	pb.UnimplementedMineServer
-	logger *zap.SugaredLogger
 }
 
-func (s *server) SendResource(ctx context.Context, request *pb.ItemRequest) (*pb.ItemReply, error) {
-	nodemap.LogInput(ctx, "SendResource", request, s.logger)
+func (s *server) SendResource(ctx context.Context, request *pb.Item) (*pb.Empty, error) {
+	nodemap.LogInput(ctx, "SendResource", request)
 
-	MyItems.Lock()
-	defer MyItems.Unlock()
-	localStore, ok := MyItems.items[nodemap.ItemType(request.Item.Type)]
-	if !ok {
-		MyItems.items[nodemap.ItemType(request.Item.Type)] = request.Item
-		return &pb.ItemReply{}, nil
+	//localStore, ok := MyItems.items[nodemap.ItemType(request.Item.Type)]
+	//if !ok {
+	//	MyItems.items[nodemap.ItemType(request.Item.Type)] = request.Item
+	//	return &pb.ItemReply{}, nil
+	//
+	//}
+	//
+	//if localStore.Count < 100 {
+	//	localStore.Count += request.Item.Count
+	//} else {
+	//	return nil, errors.New("don't have space")
+	//}
+	return &pb.Empty{}, nil
+}
 
-	}
-
-	if localStore.Count < 100 {
-		localStore.Count += request.Item.Count
-	} else {
-		return nil, errors.New("don't have space")
-	}
-	return &pb.ItemReply{}, nil
+func (s *server) GiveResource(ctx context.Context, request *pb.Item) (*pb.Item, error) {
+	nodemap.LogInput(ctx, "GiveResource", request)
+	return nil, nil
 }
 
 func RunServer() {
-	MyItems.items = map[nodemap.ItemType]*pb.Item{}
-
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-
 	port := "8080"
-	sugar := logger.Sugar()
 	sugar.Infow("Starting mine server",
 		"port", port,
 	)
 
-	conn, err := grpc.Dial(":"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	defer conn.Close()
-
-	server := &server{logger: sugar}
-	server.RunMapper(conn)
+	server := &server{}
+	server.RunMapper()
 	server.RunWorker()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))

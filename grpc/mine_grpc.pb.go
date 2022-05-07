@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MineClient interface {
-	SendResource(ctx context.Context, in *ItemRequest, opts ...grpc.CallOption) (*ItemReply, error)
+	SendResource(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Empty, error)
+	GiveResource(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Item, error)
 }
 
 type mineClient struct {
@@ -33,9 +34,18 @@ func NewMineClient(cc grpc.ClientConnInterface) MineClient {
 	return &mineClient{cc}
 }
 
-func (c *mineClient) SendResource(ctx context.Context, in *ItemRequest, opts ...grpc.CallOption) (*ItemReply, error) {
-	out := new(ItemReply)
+func (c *mineClient) SendResource(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/grpc.Mine/sendResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mineClient) GiveResource(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Item, error) {
+	out := new(Item)
+	err := c.cc.Invoke(ctx, "/grpc.Mine/giveResource", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +56,8 @@ func (c *mineClient) SendResource(ctx context.Context, in *ItemRequest, opts ...
 // All implementations must embed UnimplementedMineServer
 // for forward compatibility
 type MineServer interface {
-	SendResource(context.Context, *ItemRequest) (*ItemReply, error)
+	SendResource(context.Context, *Item) (*Empty, error)
+	GiveResource(context.Context, *Item) (*Item, error)
 	mustEmbedUnimplementedMineServer()
 }
 
@@ -54,8 +65,11 @@ type MineServer interface {
 type UnimplementedMineServer struct {
 }
 
-func (UnimplementedMineServer) SendResource(context.Context, *ItemRequest) (*ItemReply, error) {
+func (UnimplementedMineServer) SendResource(context.Context, *Item) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendResource not implemented")
+}
+func (UnimplementedMineServer) GiveResource(context.Context, *Item) (*Item, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GiveResource not implemented")
 }
 func (UnimplementedMineServer) mustEmbedUnimplementedMineServer() {}
 
@@ -71,7 +85,7 @@ func RegisterMineServer(s grpc.ServiceRegistrar, srv MineServer) {
 }
 
 func _Mine_SendResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ItemRequest)
+	in := new(Item)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -83,7 +97,25 @@ func _Mine_SendResource_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: "/grpc.Mine/sendResource",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MineServer).SendResource(ctx, req.(*ItemRequest))
+		return srv.(MineServer).SendResource(ctx, req.(*Item))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Mine_GiveResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Item)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MineServer).GiveResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc.Mine/giveResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MineServer).GiveResource(ctx, req.(*Item))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -98,6 +130,10 @@ var Mine_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "sendResource",
 			Handler:    _Mine_SendResource_Handler,
+		},
+		{
+			MethodName: "giveResource",
+			Handler:    _Mine_GiveResource_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

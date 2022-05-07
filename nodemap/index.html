@@ -40,6 +40,12 @@
           height: 15px;
       }
 
+      .node-status {
+          font-size:8px;
+          height: 20px;
+          overflow: hidden;
+      }
+
       /*body {*/
       /*    cursor: url(http://www.javascriptkit.com/dhtmltutors/cursor-hand.gif), auto;*/
       /*    transform: rotate(30deg);*/
@@ -76,6 +82,7 @@
             let newEl = document.createElement('div')
             newEl.innerHTML = `
     <input placeholder=" " class="map-item" data-row="${row}" data-col="${col}"  />
+    <span class="node-status"></span>
 `
             newEl.classList.add('item')
             newEl.classList.add('col' + col)
@@ -122,6 +129,17 @@
             body: JSON.stringify(nodes)
         });
         let data = await response.json();
+        for (let nodeData of data) {
+            let node = nodeData.node
+            if (nodeData.items) {
+                let message = []
+                for (let itemCount of nodeData.items) {
+                    message.push(`${itemCount.type}:${itemCount.count}`)
+                }
+                let cell = document.querySelector(`.col${node.col}.row${node.row} .node-status`)
+                cell.innerHTML = message.join('\n')
+            }
+        }
         console.log("resp from server", data)
     }
 

@@ -47,6 +47,11 @@ func init() {
 }
 
 func createPod(node *pb.Node) {
+	createDeployment(node)
+
+}
+
+func createDeployment(node *pb.Node) {
 	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	name := getName(node.Row, node.Col)
 	deployment := &appsv1.Deployment{
@@ -109,6 +114,13 @@ func createPod(node *pb.Node) {
 		sugar.Error(err)
 	}
 	sugar.Infof("Node was created %v %v", name, result)
+}
+
+func createService(node *pb.Node) {
+	//deploymentsClient := clientset.AppsV1().Services(apiv1.NamespaceDefault)
+	//name := getName(node.Row, node.Col)
+	//deployment := &appsv1.Deployment{}
+	//	"kind: Service\nmetadata:\n  name: map\nspec:\n  selector:\n    app: map\n  ports:\n    - protocol: TCP\n      port: 8080\n      targetPort: 8080"
 }
 
 func getName(row int32, col int32) string {

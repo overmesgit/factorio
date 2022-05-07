@@ -22,34 +22,26 @@ type server struct {
 	pb.UnimplementedMapServer
 }
 
-func (s *server) NotifyIp(ctx context.Context, in *pb.IpRequest) (*pb.IpReply, error) {
-	LogInput(ctx, "NotifyIp", in, sugar)
-	err := s.RegisterServer(in)
-	if err != nil {
-		return nil, err
-	}
-	resp := s.GetAdjustedNodes(in)
-	sugar.Infow("Send adjusted nodes",
-		"nodes", resp,
-	)
-	return &pb.IpReply{AdjustedNodes: resp}, nil
+func (s *server) UpdateNodeState(ctx context.Context, in *pb.NodeState) (*pb.Empty, error) {
+	LogInput(ctx, "updateNodeState", in)
+	mapItems.Lock()
+	defer mapItems.Unlock()
+
+	node := in.GetNode()
+
+	mapItems.nodes[Key{node.Row, node.Col}] = in
+	return &pb.Empty{}, nil
 }
 
-func LogInput(ctx context.Context, name string, in interface{}, logger *zap.SugaredLogger) {
+func LogInput(ctx context.Context, name string, in interface{}) {
 	p, ok := peer.FromContext(ctx)
 	addr := "unknown"
 	if ok {
 		addr = p.Addr.String()
 	}
-	logger.Infof("Received message %v ip %v %v",
+	sugar.Infof("Received message %v ip %v %v",
 		name, addr, in,
 	)
-}
-
-func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
-	LogInput(ctx, "UpdateMap", in, sugar)
-	nodeMap := s.RunUpdateMap(in)
-	return &pb.MapReply{Nodes: nodeMap}, nil
 }
 
 func RunServer() {
