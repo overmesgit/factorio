@@ -22,5 +22,5 @@ type ItemType string
 const (
 	Iron      ItemType = "IRON"
 	Coal      ItemType = "COAL"
-	IronPlate ItemType = "IRONPLATE"
+	IronPlate ItemType = "IR_PL"
 )

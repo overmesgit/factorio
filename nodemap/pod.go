@@ -76,7 +76,7 @@ func createDeployment(node *pb.Node) {
 					Containers: []apiv1.Container{
 						{
 							Name:  name,
-							Image: "gcr.io/factorio2022/mine:latest",
+							Image: "gcr.io/factorio2022-349510/mine:latest",
 							Env: []apiv1.EnvVar{
 								{Name: "ROW", Value: fmt.Sprint(node.Row)},
 								{Name: "COL", Value: fmt.Sprint(node.Col)},

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: map
-          image: gcr.io/factorio2022/map:latest
+          image: gcr.io/factorio2022-349510/map:latest
           resources:
             requests:
               memory: "64Mi"
@@ -64,3 +64,14 @@ spec:
     - protocol: TCP
       port: 8080
       targetPort: 8080
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: volumeclaim1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

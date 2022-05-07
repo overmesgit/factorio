@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <title>Map</title>
   <style>
-
+      body {
+          background-color: aliceblue;
+      }
       :root {
           --columns: 50;
           --rows: 50;
@@ -36,14 +38,17 @@
       }
 
       .map-item {
+          border: 0;
           width: 30px;
-          height: 15px;
+          height: 12px;
       }
 
       .node-status {
           font-size: 8px;
-          height: 20px;
+          height: 25px;
           overflow: hidden;
+          line-height:8px;
+          margin: 0;
       }
 
       /*body {*/
@@ -82,7 +87,7 @@
             let newEl = document.createElement('div')
             newEl.innerHTML = `
     <input placeholder=" " class="map-item" data-row="${row}" data-col="${col}"  />
-    <span class="node-status"></span>
+    <p class="node-status"></p>
 `
             newEl.classList.add('item')
             newEl.classList.add('col' + col)
@@ -141,6 +146,7 @@
             for (let itemCount of nodeData.items || []) {
                 message.push(`${itemCount.type}:${itemCount.count||0}`)
             }
+            message.sort()
             let cell = document.querySelector(`.col${node.col}.row${node.row} .node-status`)
             cell.innerHTML = message.join('\n')
         }

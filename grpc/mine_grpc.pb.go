@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MineClient interface {
 	SendResource(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Empty, error)
 	GiveResource(ctx context.Context, in *Item, opts ...grpc.CallOption) (*Item, error)
+	NeededResource(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Item, error)
 }
 
 type mineClient struct {
@@ -52,12 +53,22 @@ func (c *mineClient) GiveResource(ctx context.Context, in *Item, opts ...grpc.Ca
 	return out, nil
 }
 
+func (c *mineClient) NeededResource(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Item, error) {
+	out := new(Item)
+	err := c.cc.Invoke(ctx, "/grpc.Mine/neededResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MineServer is the server API for Mine service.
 // All implementations must embed UnimplementedMineServer
 // for forward compatibility
 type MineServer interface {
 	SendResource(context.Context, *Item) (*Empty, error)
 	GiveResource(context.Context, *Item) (*Item, error)
+	NeededResource(context.Context, *Empty) (*Item, error)
 	mustEmbedUnimplementedMineServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedMineServer) SendResource(context.Context, *Item) (*Empty, err
 }
 func (UnimplementedMineServer) GiveResource(context.Context, *Item) (*Item, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GiveResource not implemented")
+}
+func (UnimplementedMineServer) NeededResource(context.Context, *Empty) (*Item, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NeededResource not implemented")
 }
 func (UnimplementedMineServer) mustEmbedUnimplementedMineServer() {}
 
@@ -120,6 +134,24 @@ func _Mine_GiveResource_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Mine_NeededResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MineServer).NeededResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc.Mine/neededResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MineServer).NeededResource(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Mine_ServiceDesc is the grpc.ServiceDesc for Mine service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var Mine_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "giveResource",
 			Handler:    _Mine_GiveResource_Handler,
+		},
+		{
+			MethodName: "neededResource",
+			Handler:    _Mine_NeededResource_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
