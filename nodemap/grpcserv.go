@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 	"net"
+	"time"
 )
 
 var sugar *zap.SugaredLogger
@@ -29,7 +30,10 @@ func (s *server) UpdateNodeState(ctx context.Context, in *pb.NodeState) (*pb.Emp
 
 	node := in.GetNode()
 
-	mapItems.nodes[Key{node.Row, node.Col}] = in
+	key := Key{node.Row, node.Col}
+	mapItems.nodes[key] = in
+	mapItems.lastUpdate[key] = time.Now().Unix()
+
 	return &pb.Empty{}, nil
 }
 
@@ -48,6 +52,7 @@ func RunServer() {
 	port := "8080"
 
 	go RunHttpServer()
+	go CleanItems()
 	sugar.Infow("Starting map server",
 		"port", port,
 	)

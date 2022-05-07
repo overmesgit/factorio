@@ -94,7 +94,7 @@ func updatedNodes(nodes []*pb.Node) {
 		}
 
 		if exist, ok := mapNodes.nodes[key]; !ok {
-			createPod(node)
+			go createPod(node)
 		} else {
 			if exist.Type != node.Type || exist.Direction != node.Direction {
 				go recreatePod(node)

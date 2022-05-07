@@ -5,6 +5,7 @@ import (
 	pb "github.com/overmesgit/factorio/grpc"
 	"os"
 	"sync"
+	"time"
 )
 
 type Key struct {
@@ -17,12 +18,13 @@ type Map struct {
 }
 
 type MapItems struct {
-	nodes map[Key]*pb.NodeState
+	nodes      map[Key]*pb.NodeState
+	lastUpdate map[Key]int64
 	sync.Mutex
 }
 
 var mapNodes = Map{nodes: make(map[Key]*pb.Node, 0)}
-var mapItems = MapItems{nodes: make(map[Key]*pb.NodeState, 0)}
+var mapItems = MapItems{nodes: make(map[Key]*pb.NodeState, 0), lastUpdate: make(map[Key]int64, 0)}
 
 func init() {
 	data, err := os.ReadFile("/mnt/data/db.json")
@@ -39,6 +41,33 @@ func init() {
 	}
 	sugar.Infof("Loaded nodes from db %v", nodes)
 	updatedNodes(nodes)
+
+}
+
+func CleanItems() {
+	for {
+		time.Sleep(time.Second)
+		DoCleanItems()
+	}
+}
+
+func DoCleanItems() {
+	mapItems.Lock()
+	defer mapItems.Unlock()
+
+	var toDelete []Key
+	now := time.Now().Unix()
+	for key, val := range mapItems.lastUpdate {
+		if now-val > 5 {
+			toDelete = append(toDelete, key)
+		}
+	}
+
+	sugar.Infof("Delete outdated item statuses: %v", toDelete)
+	for _, key := range toDelete {
+		delete(mapItems.nodes, key)
+		delete(mapItems.lastUpdate, key)
+	}
 
 }
 

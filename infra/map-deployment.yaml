@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: map
-          image: gcr.io/factorio2022/map:20220507130246
+          image: gcr.io/factorio2022/map:latest
           resources:
             requests:
               memory: "64Mi"

@@ -128,8 +128,14 @@
             method: 'POST',
             body: JSON.stringify(nodes)
         });
+
+        let notEmpty = document.querySelectorAll('span.node-status:not(:empty)')
+        for (let el of notEmpty) {
+            el.innerHTML = ""
+        }
+
         let data = await response.json();
-        for (let nodeData of data) {
+        for (let nodeData of data || []) {
             let node = nodeData.node
             if (nodeData.items) {
                 let message = []

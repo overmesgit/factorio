@@ -48,7 +48,7 @@ func init() {
 
 func createPod(node *pb.Node) {
 	createDeployment(node)
-
+	createService(node)
 }
 
 func createDeployment(node *pb.Node) {
@@ -76,7 +76,7 @@ func createDeployment(node *pb.Node) {
 					Containers: []apiv1.Container{
 						{
 							Name:  name,
-							Image: "gcr.io/factorio2022/mine:dev",
+							Image: "gcr.io/factorio2022/mine:latest",
 							Env: []apiv1.EnvVar{
 								{Name: "ROW", Value: fmt.Sprint(node.Row)},
 								{Name: "COL", Value: fmt.Sprint(node.Col)},
@@ -117,10 +117,26 @@ func createDeployment(node *pb.Node) {
 }
 
 func createService(node *pb.Node) {
-	//deploymentsClient := clientset.AppsV1().Services(apiv1.NamespaceDefault)
-	//name := getName(node.Row, node.Col)
-	//deployment := &appsv1.Deployment{}
-	//	"kind: Service\nmetadata:\n  name: map\nspec:\n  selector:\n    app: map\n  ports:\n    - protocol: TCP\n      port: 8080\n      targetPort: 8080"
+	name := getName(node.Row, node.Col)
+	_, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).Create(context.TODO(), &apiv1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+		Spec: apiv1.ServiceSpec{
+			Selector: map[string]string{
+				"app": name,
+			},
+			Ports: []apiv1.ServicePort{
+				{
+					Protocol: "TCP",
+					Port:     8080,
+				},
+			},
+		},
+	}, metav1.CreateOptions{})
+	if err != nil {
+		sugar.Errorf("could not create service %v", err)
+	}
 }
 
 func getName(row int32, col int32) string {
