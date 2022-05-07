@@ -46,3 +46,14 @@ func (s *Storage) GetItemCount() []*pb.ItemCounter {
 	}
 	return res
 }
+
+func (s *Storage) GetItemForSend() *pb.Item {
+	for _, ch := range s.itemByType {
+		select {
+		case forSend := <-ch:
+			return forSend
+		default:
+		}
+	}
+	return nil
+}

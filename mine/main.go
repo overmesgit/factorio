@@ -43,18 +43,11 @@ type server struct {
 func (s *server) SendResource(ctx context.Context, request *pb.Item) (*pb.Empty, error) {
 	nodemap.LogInput(ctx, "SendResource", request)
 
-	//localStore, ok := MyItems.items[nodemap.ItemType(request.Item.Type)]
-	//if !ok {
-	//	MyItems.items[nodemap.ItemType(request.Item.Type)] = request.Item
-	//	return &pb.ItemReply{}, nil
-	//
-	//}
-	//
-	//if localStore.Count < 100 {
-	//	localStore.Count += request.Item.Count
-	//} else {
-	//	return nil, errors.New("don't have space")
-	//}
+	err := MyStorage.Add(nodemap.ItemType(request.Type))
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.Empty{}, nil
 }
 

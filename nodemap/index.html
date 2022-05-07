@@ -41,7 +41,7 @@
       }
 
       .node-status {
-          font-size:8px;
+          font-size: 8px;
           height: 20px;
           overflow: hidden;
       }
@@ -137,14 +137,12 @@
         let data = await response.json();
         for (let nodeData of data || []) {
             let node = nodeData.node
-            if (nodeData.items) {
-                let message = []
-                for (let itemCount of nodeData.items) {
-                    message.push(`${itemCount.type}:${itemCount.count}`)
-                }
-                let cell = document.querySelector(`.col${node.col}.row${node.row} .node-status`)
-                cell.innerHTML = message.join('\n')
+            let message = []
+            for (let itemCount of nodeData.items || []) {
+                message.push(`${itemCount.type}:${itemCount.count||0}`)
             }
+            let cell = document.querySelector(`.col${node.col}.row${node.row} .node-status`)
+            cell.innerHTML = message.join('\n')
         }
         console.log("resp from server", data)
     }
