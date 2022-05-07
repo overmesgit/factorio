@@ -1,10 +1,12 @@
 package nodemap
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/overmesgit/factorio/grpc"
 	pb "github.com/overmesgit/factorio/grpc"
+	"os"
 	"sync"
 )
 
@@ -19,6 +21,24 @@ type Map struct {
 
 var nodeMap = Map{nodes: make(map[Key]*pb.Node, 0)}
 
+func init() {
+	data, err := os.ReadFile("/mnt/data/db.json")
+	if err != nil {
+		sugar.Error(err)
+		return
+	}
+
+	var nodes []*pb.Node
+	err = json.Unmarshal(data, &nodes)
+	if err != nil {
+		sugar.Error(err)
+		return
+	}
+	sugar.Infof("Loaded nodes from db %v", nodes)
+	updatedNodes(nodes)
+
+}
+
 func (s *server) RegisterServer(in *grpc.IpRequest) error {
 	nodeMap.Lock()
 	defer nodeMap.Unlock()
@@ -29,11 +49,11 @@ func (s *server) RegisterServer(in *grpc.IpRequest) error {
 	node, ok := nodeMap.nodes[k]
 	if !ok {
 		err := errors.New(fmt.Sprintf("Trying to map unregistered node %v", in))
-		s.logger.Errorw(err.Error())
+		sugar.Error(err.Error())
 		return err
 	}
 
-	s.logger.Infof("Registering node %v %v", in.GetIp(), in.GetItems())
+	sugar.Infof("Registering node %v %v", in.GetIp(), in.GetItems())
 	node.Ip = in.GetIp()
 	node.Items = in.GetItems()
 	return nil
@@ -78,7 +98,7 @@ func (s *server) RunUpdateMap(in *pb.MapRequest) []*pb.Node {
 			nodeMap.nodes[k] = node
 		}
 	}
-	s.logger.Infof("UpdatedNodes: %v", nodeMap.nodes)
+	sugar.Infof("UpdatedNodes: %v", nodeMap.nodes)
 
 	nodesList := make([]*pb.Node, 0)
 	for _, node := range nodeMap.nodes {

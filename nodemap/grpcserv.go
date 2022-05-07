@@ -10,19 +10,26 @@ import (
 	"net"
 )
 
+var sugar *zap.SugaredLogger
+
+func init() {
+	logger, _ := zap.NewProduction()
+	sugar = logger.Sugar()
+
+}
+
 type server struct {
 	pb.UnimplementedMapServer
-	logger *zap.SugaredLogger
 }
 
 func (s *server) NotifyIp(ctx context.Context, in *pb.IpRequest) (*pb.IpReply, error) {
-	LogInput(ctx, "NotifyIp", in, s.logger)
+	LogInput(ctx, "NotifyIp", in, sugar)
 	err := s.RegisterServer(in)
 	if err != nil {
 		return nil, err
 	}
 	resp := s.GetAdjustedNodes(in)
-	s.logger.Infow("Send adjusted nodes",
+	sugar.Infow("Send adjusted nodes",
 		"nodes", resp,
 	)
 	return &pb.IpReply{AdjustedNodes: resp}, nil
@@ -40,17 +47,15 @@ func LogInput(ctx context.Context, name string, in interface{}, logger *zap.Suga
 }
 
 func (s *server) UpdateMap(ctx context.Context, in *pb.MapRequest) (*pb.MapReply, error) {
-	LogInput(ctx, "UpdateMap", in, s.logger)
+	LogInput(ctx, "UpdateMap", in, sugar)
 	nodeMap := s.RunUpdateMap(in)
 	return &pb.MapReply{Nodes: nodeMap}, nil
 }
 
 func RunServer() {
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-
 	port := "8080"
-	sugar := logger.Sugar()
+
+	go RunHttpServer()
 	sugar.Infow("Starting map server",
 		"port", port,
 	)
@@ -61,7 +66,7 @@ func RunServer() {
 			"error", err)
 	}
 	s := grpc.NewServer()
-	pb.RegisterMapServer(s, &server{logger: sugar})
+	pb.RegisterMapServer(s, &server{})
 	sugar.Infow("server started",
 		"port", port,
 		"addr", lis.Addr(),

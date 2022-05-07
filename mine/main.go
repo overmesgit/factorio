@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
-	"github.com/overmesgit/factorio/localmap"
 	"github.com/overmesgit/factorio/nodemap"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,7 +17,7 @@ import (
 
 var MyNode *pb.Node
 var MyItems struct {
-	items map[localmap.ItemType]*pb.Item
+	items map[nodemap.ItemType]*pb.Item
 	sync.Mutex
 }
 
@@ -34,9 +33,9 @@ func (s *server) SendResource(ctx context.Context, request *pb.ItemRequest) (*pb
 
 	MyItems.Lock()
 	defer MyItems.Unlock()
-	localStore, ok := MyItems.items[localmap.ItemType(request.Item.Type)]
+	localStore, ok := MyItems.items[nodemap.ItemType(request.Item.Type)]
 	if !ok {
-		MyItems.items[localmap.ItemType(request.Item.Type)] = request.Item
+		MyItems.items[nodemap.ItemType(request.Item.Type)] = request.Item
 		return &pb.ItemReply{}, nil
 
 	}
@@ -50,7 +49,7 @@ func (s *server) SendResource(ctx context.Context, request *pb.ItemRequest) (*pb
 }
 
 func RunServer() {
-	MyItems.items = map[localmap.ItemType]*pb.Item{}
+	MyItems.items = map[nodemap.ItemType]*pb.Item{}
 
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
@@ -61,7 +60,7 @@ func RunServer() {
 		"port", port,
 	)
 
-	conn, err := grpc.Dial(localmap.MapServer+":"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(":"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

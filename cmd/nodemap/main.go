@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	fmt.Println("version:1")
+	fmt.Println("version:2")
 	nodemap.RunServer()
 }

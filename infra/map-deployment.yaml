@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: map-dep
   labels:
-    app: map
+    app: map-dep
 spec:
   replicas: 1
   selector:
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: map
-          image: gcr.io/factorio2022/map:dev
+          image: gcr.io/factorio2022/map:20220507130246
           resources:
             requests:
               memory: "64Mi"
@@ -30,7 +30,8 @@ spec:
               cpu: "500m"
               ephemeral-storage: "100Mi"
           ports:
-            - containerPort: 80
+            - containerPort: 8081
+              name: map-port
           volumeMounts:
             - name: volume1
               mountPath: /mnt/data
@@ -38,3 +39,16 @@ spec:
         - name: volume1
           persistentVolumeClaim:
             claimName: volumeclaim1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: map
+spec:
+  selector:
+    app: map
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: map-port

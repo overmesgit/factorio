@@ -1,54 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Map</title>
-    <style>
+  <meta charset="UTF-8">
+  <title>Map</title>
+  <style>
 
-        :root {
-            --columns: 50;
-            --rows: 50;
-        }
+      :root {
+          --columns: 50;
+          --rows: 50;
+      }
 
-        .head-container {
-            display: grid;
-            gap: 5px 5px;
-            justify-items: center;
-            grid-template-columns: repeat(var(--columns), 40px);
-            grid-template-rows: 20px;
-            margin-left: 20px;
-        }
+      .head-container {
+          display: grid;
+          gap: 5px 5px;
+          justify-items: center;
+          grid-template-columns: repeat(var(--columns), 40px);
+          grid-template-rows: 20px;
+          margin-left: 20px;
+      }
 
-        .left-container {
-            float: left;
-            display: grid;
-            gap: 5px 5px;
-            justify-items: center;
-            grid-template-columns: 20px;
-            grid-template-rows: repeat(var(--rows), 40px);
-        }
+      .left-container {
+          float: left;
+          display: grid;
+          gap: 5px 5px;
+          justify-items: center;
+          grid-template-columns: 20px;
+          grid-template-rows: repeat(var(--rows), 40px);
+      }
 
-        .map-container {
-            display: grid;
-            gap: 5px 5px;
-            grid-template-columns: repeat(var(--columns), 40px);
-            grid-template-rows: repeat(var(--rows), 40px);
-        }
+      .map-container {
+          display: grid;
+          gap: 5px 5px;
+          grid-template-columns: repeat(var(--columns), 40px);
+          grid-template-rows: repeat(var(--rows), 40px);
+      }
 
-        .map-item {
-            width: 30px;
-            height: 15px;
-        }
+      .map-item {
+          width: 30px;
+          height: 15px;
+      }
 
-        /*body {*/
-        /*    cursor: url(http://www.javascriptkit.com/dhtmltutors/cursor-hand.gif), auto;*/
-        /*    transform: rotate(30deg);*/
-        /*}*/
+      /*body {*/
+      /*    cursor: url(http://www.javascriptkit.com/dhtmltutors/cursor-hand.gif), auto;*/
+      /*    transform: rotate(30deg);*/
+      /*}*/
 
-    </style>
-    <script>
-        var MapData = JSON.parse({{.Data}})
-    </script>
+  </style>
+  <script>
+      var MapData = JSON.parse({{.Data}})
+  </script>
 
 
 </head>
@@ -74,17 +74,25 @@
     for (let row = 0; row < 50; row++) {
         for (let col = 0; col < 50; col++) {
             let newEl = document.createElement('div')
-            newEl.innerHTML = '<input placeholder=" " class="map-item" data-row=" ' + row + ' " data-col="' + col + '"  />';
+            newEl.innerHTML = `
+    <input placeholder=" " class="map-item" data-row="${row}" data-col="${col}"  />
+`
             newEl.classList.add('item')
             newEl.classList.add('col' + col)
             newEl.classList.add('row' + row)
             newEl.onchange = onChange;
+            newEl.onkeydown = (event) => {
+                if (event.key === "Enter") {
+                    newEl.querySelector('input').blur();
+                }
+            }
             data.append(newEl)
         }
     }
+
     if (MapData) {
         for (let node of MapData) {
-            let cell = document.querySelector('.col'+node.col+'.row'+node.row + '>input')
+            let cell = document.querySelector(`.col${node.col}.row${node.row} input`)
             cell.value = node.type + ':' + node.direction
         }
     }
@@ -95,7 +103,7 @@
     }
 
     async function sendData() {
-        let nodesEl = document.querySelectorAll('input:not(:placeholder-shown)')
+        let nodesEl = document.querySelectorAll('input.map-item:not(:placeholder-shown)')
 
         let nodes = []
         for (let node of nodesEl) {
@@ -116,6 +124,7 @@
         let data = await response.json();
         console.log("resp from server", data)
     }
+
     setInterval(() => {
         sendData();
     }, 1000)

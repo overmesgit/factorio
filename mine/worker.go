@@ -2,7 +2,7 @@ package mine
 
 import (
 	pb "github.com/overmesgit/factorio/grpc"
-	"github.com/overmesgit/factorio/localmap"
+	"github.com/overmesgit/factorio/nodemap"
 	"time"
 )
 
@@ -21,8 +21,8 @@ func (s *server) DoWork() {
 
 		s.logger.Infof("Do work %v\n", MyNode)
 
-		switch localmap.Type(MyNode.Type) {
-		case localmap.IronMine:
+		switch nodemap.Type(MyNode.Type) {
+		case nodemap.IronMine:
 			s.ironMine()
 		default:
 
@@ -31,7 +31,7 @@ func (s *server) DoWork() {
 }
 
 func (s *server) ironMine() {
-	mineType := localmap.Iron
+	mineType := nodemap.Iron
 
 	MyItems.Lock()
 	defer MyItems.Unlock()
