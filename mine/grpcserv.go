@@ -13,11 +13,11 @@ import (
 	"strconv"
 )
 
-var sugar *zap.SugaredLogger
+var Sugar *zap.SugaredLogger
 
 func init() {
 	logger, _ := zap.NewProduction()
-	sugar = logger.Sugar()
+	Sugar = logger.Sugar()
 
 	col, err := strconv.Atoi(os.Getenv("COL"))
 	if err != nil {
@@ -73,7 +73,7 @@ func (s *server) GiveResource(ctx context.Context, request *pb.Item) (*pb.Item, 
 	nodemap.LogInput(ctx, "GiveResource", request)
 	item := MyStorage.Get(nodemap.ItemType(request.GetType()))
 	if item == nil {
-		sugar.Infof("Nothing to give %v.", MyStorage.GetItemCount())
+		Sugar.Infof("Nothing to give %v.", MyStorage.GetItemCount())
 		return nil, errors.New("nothing to give")
 	}
 	return item, nil
@@ -81,7 +81,8 @@ func (s *server) GiveResource(ctx context.Context, request *pb.Item) (*pb.Item, 
 
 func RunServer() {
 	port := "8080"
-	sugar.Infow("Starting mine server",
+	Sugar.Infow(
+		"Starting mine server",
 		"port", port,
 	)
 
@@ -91,17 +92,22 @@ func RunServer() {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
 	if err != nil {
-		sugar.Fatalw("Failed to listen",
-			"error", err)
+		Sugar.Fatalw(
+			"Failed to listen",
+			"error", err,
+		)
 	}
 	s := grpc.NewServer()
 	pb.RegisterMineServer(s, server)
-	sugar.Infow("server started",
+	Sugar.Infow(
+		"server started",
 		"port", port,
 		"addr", lis.Addr(),
 	)
 	if err := s.Serve(lis); err != nil {
-		sugar.Fatalw("Server failed",
-			"error", err)
+		Sugar.Fatalw(
+			"Server failed",
+			"error", err,
+		)
 	}
 }

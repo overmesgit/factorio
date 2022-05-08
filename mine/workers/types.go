@@ -1,4 +1,4 @@
-package nodemap
+package workers
 
 type Type string
 type Direction string

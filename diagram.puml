@@ -1,6 +1,11 @@
 @startuml
 'https://plantuml.com/component-diagram
 
+'TODO:
+'improve map, add copy
+'refactor worker
+'factory node
+
 package "Local" {
   [LocalMachine]
   component A [

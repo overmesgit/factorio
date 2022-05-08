@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+type Worker interface {
+	DoWork()
+	NeededItem()
+}
+
 func (s *server) RunWorker() {
 	go s.DoWork()
 	go s.SendItems()
@@ -15,7 +20,7 @@ func (s *server) DoWork() {
 	var err error
 	for {
 		time.Sleep(time.Second)
-		sugar.Infof("Do work %v\n", MyNode)
+		Sugar.Infof("Do work %v\n", MyNode)
 		err = nil
 
 		switch nodemap.Type(MyNode.Type) {
@@ -37,7 +42,7 @@ func (s *server) DoWork() {
 
 		}
 
-		sugar.Infof("After work. Err %v LocalStore %v", err, MyStorage.GetItemCount())
+		Sugar.Infof("After work. Err %v LocalStore %v", err, MyStorage.GetItemCount())
 
 	}
 }
