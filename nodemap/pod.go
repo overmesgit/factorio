@@ -76,7 +76,7 @@ func createDeployment(node *pb.Node) {
 					Containers: []apiv1.Container{
 						{
 							Name:  name,
-							Image: "gcr.io/factorio2022-349510/mine:latest",
+							Image: "gcr.io/factorio2022/mine:latest",
 							Env: []apiv1.EnvVar{
 								{Name: "ROW", Value: fmt.Sprint(node.Row)},
 								{Name: "COL", Value: fmt.Sprint(node.Col)},
@@ -90,15 +90,15 @@ func createDeployment(node *pb.Node) {
 								},
 							},
 							Resources: apiv1.ResourceRequirements{
-								Limits: apiv1.ResourceList{
+								Requests: apiv1.ResourceList{
 									"memory":            resource.MustParse("64Mi"),
 									"cpu":               resource.MustParse("250m"),
-									"ephemeral-storage": resource.MustParse("100Mi"),
+									"ephemeral-storage": resource.MustParse("5Mi"),
 								},
-								Requests: apiv1.ResourceList{
+								Limits: apiv1.ResourceList{
 									"memory":            resource.MustParse("128Mi"),
-									"cpu":               resource.MustParse("250m"),
-									"ephemeral-storage": resource.MustParse("100Mi"),
+									"cpu":               resource.MustParse("500m"),
+									"ephemeral-storage": resource.MustParse("5Mi"),
 								},
 							},
 						},

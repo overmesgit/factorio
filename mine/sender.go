@@ -52,7 +52,7 @@ func (s *server) sendItemFromStore(adjNode *pb.Node) error {
 	sugar.Infof("Send items. Current store. %v forSend %v", MyStorage.GetItemCount())
 
 	var forSend *pb.Item
-	if MyNode.Type == nodemap.Furnace {
+	if MyNode.Type == string(nodemap.Furnace) {
 		forSend = MyStorage.Get(nodemap.IronPlate)
 	} else {
 		forSend = MyStorage.GetItemForSend()
