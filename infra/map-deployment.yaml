@@ -26,8 +26,8 @@ spec:
               cpu: "250m"
               ephemeral-storage: "100Mi"
             limits:
-              memory: "128Mi"
-              cpu: "500m"
+              memory: "64Mi"
+              cpu: "250m"
               ephemeral-storage: "100Mi"
           ports:
             - containerPort: 8081

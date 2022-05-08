@@ -7,6 +7,7 @@
       body {
           background-color: aliceblue;
       }
+
       :root {
           --columns: 50;
           --rows: 50;
@@ -35,6 +36,7 @@
           gap: 5px 5px;
           grid-template-columns: repeat(var(--columns), 40px);
           grid-template-rows: repeat(var(--rows), 40px);
+          user-select: none;
       }
 
       .map-item {
@@ -47,8 +49,12 @@
           font-size: 8px;
           height: 25px;
           overflow: hidden;
-          line-height:8px;
+          line-height: 8px;
           margin: 0;
+      }
+
+      .selected {
+          background-color: darkkhaki;
       }
 
       /*body {*/
@@ -59,6 +65,7 @@
   </style>
   <script>
       var MapData = JSON.parse({{.Data}})
+
   </script>
 
 
@@ -70,49 +77,149 @@
 
 
 <script>
-    let header = document.getElementById("header");
-    let left = document.getElementById("left");
-    for (let col = 0; col < 50; col++) {
-        let newEl = document.createElement('div')
-        newEl.innerHTML = col;
-        header.append(newEl);
-        let rowEl = document.createElement('div')
-        rowEl.innerHTML = col;
-        left.append(rowEl);
+
+    initMap()
+    setInterval(() => {
+        sendData();
+    }, 1000)
+
+    initSelecting()
+
+
+    function initSelecting() {
+        let container = document.getElementById("data");
+        let bound = container.getBoundingClientRect()
+        let offsetLeft = bound.left
+        let offsetTop = bound.top
+
+        let startNode = null
+        let currentRange = null
+        let copiedRange = null
+        let counter = 0
+
+        let ctrl = false;
+        document.onkeydown = (event) => {
+            if (event.key === 'Control') {
+                ctrl = true
+            }
+            if (event.key === 'c' && ctrl) {
+                ctrl = false
+                copiedRange = currentRange
+                console.log('copy', currentRange)
+            }
+            if (event.key === 'v' && ctrl) {
+                ctrl = false
+                console.log('past', copiedRange)
+                if (copiedRange && currentRange) {
+                    let start = copiedRange[0], end = copiedRange[1]
+                    for (let ri = start[0]; ri <= end[0]; ri++) {
+                        for (let ci = start[1]; ci <= end[1]; ci++) {
+                            let source = `.row${ri}.col${ci}.item input`
+                            let sourceText = document.querySelector(source).value
+
+                            let dest = `.row${currentRange[0][0]+ri-start[0]}.col${currentRange[0][1]+ci-start[1]}.item input`
+                            document.querySelector(dest).value = sourceText
+                        }
+                    }
+                }
+            }
+        }
+
+        container.onmousedown = (event) => {
+            console.log(event)
+
+            let sel = document.querySelectorAll('.selected')
+            for (let s of sel) {
+                s.classList.remove("selected")
+            }
+
+            let row = Math.floor((event.y - offsetTop) / 45)
+            let col = Math.floor((event.x - offsetLeft) / 45)
+            startNode = [row, col]
+            counter = 0
+
+            let selector = `.col${col}.row${row}.item`
+            let nodeEl = document.querySelector(selector)
+
+            nodeEl.classList.add("selected")
+            currentRange = [[row, col], [row, col]]
+        }
+
+        container.onmouseup = (event) => {
+            console.log(event)
+            startNode = null
+        }
+
+        container.onmousemove = (event) => {
+            if (startNode) {
+                let row = Math.floor((event.y - offsetTop) / 45)
+                let col = Math.floor((event.x - offsetLeft) / 45)
+                endNode = [row, col]
+
+                counter += 1
+                if (counter % 5 === 0) {
+                    return
+                }
+                console.log(startNode, endNode)
+                currentRange = [startNode, endNode]
+
+                for (let ri = startNode[0]; ri <= endNode[0]; ri++) {
+                    for (let ci = startNode[1]; ci <= endNode[1]; ci++) {
+                        let selector = `.row${ri}.col${ci}.item:not(.selected)`
+                        let nodeEl = document.querySelector(selector)
+                        if (nodeEl) {
+                            nodeEl.classList.add('selected')
+                        }
+                    }
+                }
+
+            }
+        }
+
     }
 
-    let data = document.getElementById("data");
-    for (let row = 0; row < 50; row++) {
+
+    function initMap() {
+        let header = document.getElementById("header");
+        let left = document.getElementById("left");
         for (let col = 0; col < 50; col++) {
             let newEl = document.createElement('div')
-            newEl.innerHTML = `
+            newEl.innerHTML = col;
+            header.append(newEl);
+            let rowEl = document.createElement('div')
+            rowEl.innerHTML = col;
+            left.append(rowEl);
+        }
+
+        let data = document.getElementById("data");
+        for (let row = 0; row < 50; row++) {
+            for (let col = 0; col < 50; col++) {
+                let newEl = document.createElement('div')
+                newEl.innerHTML = `
     <input placeholder=" " class="map-item" data-row="${row}" data-col="${col}"  />
     <p class="node-status"></p>
 `
-            newEl.classList.add('item')
-            newEl.classList.add('col' + col)
-            newEl.classList.add('row' + row)
-            newEl.onchange = onChange;
-            newEl.onkeydown = (event) => {
-                if (event.key === "Enter") {
-                    newEl.querySelector('input').blur();
+                newEl.classList.add('item')
+                newEl.classList.add('col' + col)
+                newEl.classList.add('row' + row)
+                newEl.onkeydown = (event) => {
+                    if (event.key === "Enter") {
+                        newEl.querySelector('input').blur();
+                    }
                 }
+                data.append(newEl)
             }
-            data.append(newEl)
+        }
+
+        if (MapData) {
+            for (let node of MapData) {
+                let cell = document.querySelector(`.col${node.col}.row${node.row} input`)
+                cell.value = node.type + ':' + node.direction
+            }
         }
     }
 
-    if (MapData) {
-        for (let node of MapData) {
-            let cell = document.querySelector(`.col${node.col}.row${node.row} input`)
-            cell.value = node.type + ':' + node.direction
-        }
-    }
-
-    function onChange(event) {
-        let target = event.target;
-        console.log(event, target.value, target.dataset)
-    }
+    let lastSend = null;
 
     async function sendData() {
         let nodesEl = document.querySelectorAll('input.map-item:not(:placeholder-shown)')
@@ -128,6 +235,12 @@
                 direction: typeAndDir.slice(-1)
             })
         }
+
+        if (JSON.stringify(lastSend) === JSON.stringify(nodes)) {
+            return
+        }
+        lastSend = nodes;
+
         console.log("data for send", nodes)
         const response = await fetch('/update', {
             method: 'POST',
@@ -144,7 +257,7 @@
             let node = nodeData.node
             let message = []
             for (let itemCount of nodeData.items || []) {
-                message.push(`${itemCount.type}:${itemCount.count||0}`)
+                message.push(`${itemCount.type}:${itemCount.count || 0}`)
             }
             message.sort()
             let cell = document.querySelector(`.col${node.col}.row${node.row} .node-status`)
@@ -152,10 +265,6 @@
         }
         console.log("resp from server", data)
     }
-
-    setInterval(() => {
-        sendData();
-    }, 1000)
 
 </script>
 

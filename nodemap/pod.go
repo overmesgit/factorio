@@ -96,8 +96,8 @@ func createDeployment(node *pb.Node) {
 									"ephemeral-storage": resource.MustParse("5Mi"),
 								},
 								Limits: apiv1.ResourceList{
-									"memory":            resource.MustParse("128Mi"),
-									"cpu":               resource.MustParse("500m"),
+									"memory":            resource.MustParse("64Mi"),
+									"cpu":               resource.MustParse("250m"),
 									"ephemeral-storage": resource.MustParse("5Mi"),
 								},
 							},
@@ -118,22 +118,24 @@ func createDeployment(node *pb.Node) {
 
 func createService(node *pb.Node) {
 	name := getName(node.Row, node.Col)
-	_, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).Create(context.TODO(), &apiv1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-		Spec: apiv1.ServiceSpec{
-			Selector: map[string]string{
-				"app": name,
+	_, err := clientset.CoreV1().Services(apiv1.NamespaceDefault).Create(
+		context.TODO(), &apiv1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: name,
 			},
-			Ports: []apiv1.ServicePort{
-				{
-					Protocol: "TCP",
-					Port:     8080,
+			Spec: apiv1.ServiceSpec{
+				Selector: map[string]string{
+					"app": name,
+				},
+				Ports: []apiv1.ServicePort{
+					{
+						Protocol: "TCP",
+						Port:     8080,
+					},
 				},
 			},
-		},
-	}, metav1.CreateOptions{})
+		}, metav1.CreateOptions{},
+	)
 	if err != nil {
 		sugar.Errorf("could not create service %v", err)
 	}
