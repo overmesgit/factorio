@@ -1,6 +1,8 @@
 @startuml
 'https://plantuml.com/component-diagram
 
+'TODO: Max amount nodes is about 100. Better to make that 1 node is responsible for 9/16 tiles.
+
 package "Local" {
   [LocalMachine]
   component A [

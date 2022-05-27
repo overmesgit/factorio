@@ -74,6 +74,13 @@
 <div id="header" class="head-container"></div>
 <div id="left" class="left-container"></div>
 <div id="data" class="map-container"></div>
+<div style="position: absolute; right: 100px; top: 50px; background-color: darkkhaki">
+  	<p>IronMine    = MI</p>
+	  <p>CoalMine    = MC</p>
+	  <p>Belt        = BE</p>
+	  <p>Furnace     = FU</p>
+	  <p>Manipulator = MA</p>
+</div>
 
 
 <script>
@@ -126,8 +133,6 @@
         }
 
         container.onmousedown = (event) => {
-            console.log(event)
-
             let sel = document.querySelectorAll('.selected')
             for (let s of sel) {
                 s.classList.remove("selected")
@@ -143,6 +148,7 @@
 
             nodeEl.classList.add("selected")
             currentRange = [[row, col], [row, col]]
+            nodeEl.querySelector('input').focus()
         }
 
         container.onmouseup = (event) => {
@@ -207,6 +213,9 @@
                         newEl.querySelector('input').blur();
                     }
                 }
+                newEl.onclick = (event) => {
+                    newEl.querySelector('input').focus();
+                }
                 data.append(newEl)
             }
         }
@@ -214,12 +223,10 @@
         if (MapData) {
             for (let node of MapData) {
                 let cell = document.querySelector(`.col${node.col}.row${node.row} input`)
-                cell.value = node.type + ':' + node.direction
+                cell.value = node.type + node.direction
             }
         }
     }
-
-    let lastSend = null;
 
     async function sendData() {
         let nodesEl = document.querySelectorAll('input.map-item:not(:placeholder-shown)')
@@ -236,12 +243,6 @@
             })
         }
 
-        if (JSON.stringify(lastSend) === JSON.stringify(nodes)) {
-            return
-        }
-        lastSend = nodes;
-
-        console.log("data for send", nodes)
         const response = await fetch('/update', {
             method: 'POST',
             body: JSON.stringify(nodes)
@@ -263,7 +264,9 @@
             let cell = document.querySelector(`.col${node.col}.row${node.row} .node-status`)
             cell.innerHTML = message.join('\n')
         }
-        console.log("resp from server", data)
+        if (response.status !== 200) {
+            console.log("resp from server", response, data)
+        }
     }
 
 </script>
