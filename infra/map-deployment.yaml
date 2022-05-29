@@ -22,12 +22,12 @@ spec:
           image: gcr.io/factorio2022/map:latest
           resources:
             requests:
-              memory: "64Mi"
-              cpu: "250m"
+              memory: "256Mi"
+              cpu: "500m"
               ephemeral-storage: "100Mi"
             limits:
-              memory: "64Mi"
-              cpu: "250m"
+              memory: "256Mi"
+              cpu: "500m"
               ephemeral-storage: "100Mi"
           ports:
             - containerPort: 8081

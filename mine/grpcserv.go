@@ -81,7 +81,8 @@ func (s *server) GiveResource(ctx context.Context, request *pb.Item) (*pb.Item, 
 
 func RunServer() {
 	port := "8080"
-	sugar.Infow("Starting mine server",
+	sugar.Infow(
+		"Starting mine server",
 		"port", port,
 	)
 
@@ -91,17 +92,22 @@ func RunServer() {
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
 	if err != nil {
-		sugar.Fatalw("Failed to listen",
-			"error", err)
+		sugar.Fatalw(
+			"Failed to listen",
+			"error", err,
+		)
 	}
 	s := grpc.NewServer()
 	pb.RegisterMineServer(s, server)
-	sugar.Infow("server started",
+	sugar.Infow(
+		"server started",
 		"port", port,
 		"addr", lis.Addr(),
 	)
 	if err := s.Serve(lis); err != nil {
-		sugar.Fatalw("Server failed",
-			"error", err)
+		sugar.Fatalw(
+			"Server failed",
+			"error", err,
+		)
 	}
 }

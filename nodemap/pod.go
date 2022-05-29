@@ -92,12 +92,12 @@ func createDeployment(node *pb.Node) {
 							Resources: apiv1.ResourceRequirements{
 								Requests: apiv1.ResourceList{
 									"memory":            resource.MustParse("64Mi"),
-									"cpu":               resource.MustParse("250m"),
+									"cpu":               resource.MustParse("30m"),
 									"ephemeral-storage": resource.MustParse("5Mi"),
 								},
 								Limits: apiv1.ResourceList{
 									"memory":            resource.MustParse("64Mi"),
-									"cpu":               resource.MustParse("250m"),
+									"cpu":               resource.MustParse("30m"),
 									"ephemeral-storage": resource.MustParse("5Mi"),
 								},
 							},

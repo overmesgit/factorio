@@ -12,11 +12,12 @@ import (
 )
 
 var sugar *zap.SugaredLogger
+var updateCh chan *pb.NodeState
 
 func init() {
 	logger, _ := zap.NewProduction()
 	sugar = logger.Sugar()
-
+	updateCh = make(chan *pb.NodeState, 100)
 }
 
 type server struct {
@@ -25,16 +26,24 @@ type server struct {
 
 func (s *server) UpdateNodeState(ctx context.Context, in *pb.NodeState) (*pb.Empty, error) {
 	LogInput(ctx, "updateNodeState", in)
-	mapItems.Lock()
-	defer mapItems.Unlock()
 
-	node := in.GetNode()
-
-	key := Key{node.Row, node.Col}
-	mapItems.nodes[key] = in
-	mapItems.lastUpdate[key] = time.Now().Unix()
+	select {
+	case updateCh <- in:
+	default:
+		sugar.Infof("skip message from node %v", in.GetNode())
+	}
 
 	return &pb.Empty{}, nil
+}
+
+func updateNodeMap() {
+	for {
+		in := <-updateCh
+		node := in.GetNode()
+		key := Key{node.Row, node.Col}
+		mapItems.nodes[key] = in
+		mapItems.lastUpdate[key] = time.Now().Unix()
+	}
 }
 
 func LogInput(ctx context.Context, name string, in interface{}) {
@@ -43,7 +52,8 @@ func LogInput(ctx context.Context, name string, in interface{}) {
 	if ok {
 		addr = p.Addr.String()
 	}
-	sugar.Infof("Received message %v ip %v %v",
+	sugar.Infof(
+		"Received message %v ip %v %v",
 		name, addr, in,
 	)
 }
@@ -53,23 +63,30 @@ func RunServer() {
 
 	go RunHttpServer()
 	go CleanItems()
-	sugar.Infow("Starting map server",
+	go updateNodeMap()
+	sugar.Infow(
+		"Starting map server",
 		"port", port,
 	)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
 	if err != nil {
-		sugar.Fatalw("Failed to listen",
-			"error", err)
+		sugar.Fatalw(
+			"Failed to listen",
+			"error", err,
+		)
 	}
 	s := grpc.NewServer()
 	pb.RegisterMapServer(s, &server{})
-	sugar.Infow("server started",
+	sugar.Infow(
+		"server started",
 		"port", port,
 		"addr", lis.Addr(),
 	)
 	if err := s.Serve(lis); err != nil {
-		sugar.Fatalw("Server failed",
-			"error", err)
+		sugar.Fatalw(
+			"Server failed",
+			"error", err,
+		)
 	}
 }

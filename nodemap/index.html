@@ -74,19 +74,19 @@
 <div id="header" class="head-container"></div>
 <div id="left" class="left-container"></div>
 <div id="data" class="map-container"></div>
-<div style="position: absolute; right: 100px; top: 50px; background-color: darkkhaki">
-  	<p>IronMine    = MI</p>
-	  <p>CoalMine    = MC</p>
-	  <p>Belt        = BE</p>
-	  <p>Furnace     = FU</p>
-	  <p>Manipulator = MA</p>
+<div style="position: fixed; right: 100px; top: 50px; background-color: darkkhaki">
+  <p>IronMine = MI</p>
+  <p>CoalMine = MC</p>
+  <p>Belt = BE</p>
+  <p>Furnace = FU</p>
+  <p>Manipulator = MA</p>
 </div>
 
 
 <script>
 
     initMap()
-    setInterval(() => {
+    setTimeout(() => {
         sendData();
     }, 1000)
 
@@ -124,7 +124,7 @@
                             let source = `.row${ri}.col${ci}.item input`
                             let sourceText = document.querySelector(source).value
 
-                            let dest = `.row${currentRange[0][0]+ri-start[0]}.col${currentRange[0][1]+ci-start[1]}.item input`
+                            let dest = `.row${currentRange[0][0] + ri - start[0]}.col${currentRange[0][1] + ci - start[1]}.item input`
                             document.querySelector(dest).value = sourceText
                         }
                     }
@@ -138,8 +138,8 @@
                 s.classList.remove("selected")
             }
 
-            let row = Math.floor((event.y - offsetTop) / 45)
-            let col = Math.floor((event.x - offsetLeft) / 45)
+            let row = Math.floor((event.pageY - offsetTop) / 45)
+            let col = Math.floor((event.pageX - offsetLeft) / 45)
             startNode = [row, col]
             counter = 0
 
@@ -158,8 +158,8 @@
 
         container.onmousemove = (event) => {
             if (startNode) {
-                let row = Math.floor((event.y - offsetTop) / 45)
-                let col = Math.floor((event.x - offsetLeft) / 45)
+                let row = Math.floor((event.pageY - offsetTop) / 45)
+                let col = Math.floor((event.pageX - offsetLeft) / 45)
                 endNode = [row, col]
 
                 counter += 1
@@ -213,7 +213,7 @@
                         newEl.querySelector('input').blur();
                     }
                 }
-                newEl.onclick = (event) => {
+                newEl.ondblclick = (event) => {
                     newEl.querySelector('input').focus();
                 }
                 data.append(newEl)
@@ -267,6 +267,9 @@
         if (response.status !== 200) {
             console.log("resp from server", response, data)
         }
+        setTimeout(() => {
+            sendData();
+        }, 1000)
     }
 
 </script>
