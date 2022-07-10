@@ -5,6 +5,7 @@ import (
 	pb "github.com/overmesgit/factorio/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"os"
 	"time"
 )
 
@@ -18,7 +19,12 @@ func (s *server) RunMapper() {
 }
 
 func (s *server) UpdateMapState() {
-	conn, err := grpc.Dial("map:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	url := "map:8080"
+	if os.Getenv("local") != "" {
+		url = "host.minikube.internal:8080"
+	}
+	sugar.Infof("Map url %v", url)
+	conn, err := grpc.Dial(url, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		sugar.Errorw("failed to connect: %v", err)
 		return
@@ -29,10 +35,12 @@ func (s *server) UpdateMapState() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := c.UpdateNodeState(ctx, &pb.NodeState{
-		Node:  MyNode,
-		Items: MyStorage.GetItemCount(),
-	})
+	r, err := c.UpdateNodeState(
+		ctx, &pb.NodeState{
+			Node:  MyNode,
+			Items: MyStorage.GetItemCount(),
+		},
+	)
 	if err != nil {
 		sugar.Errorf("Could not update my status: %v\n", err)
 		return

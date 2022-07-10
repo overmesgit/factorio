@@ -54,6 +54,10 @@ func createPod(node *pb.Node) {
 func createDeployment(node *pb.Node) {
 	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	name := getName(node.Row, node.Col)
+	var pull apiv1.PullPolicy
+	if os.Getenv("local") != "" {
+		pull = apiv1.PullNever
+	}
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -75,13 +79,15 @@ func createDeployment(node *pb.Node) {
 				Spec: apiv1.PodSpec{
 					Containers: []apiv1.Container{
 						{
-							Name:  name,
-							Image: "gcr.io/factorio2022/mine:latest",
+							Name:            name,
+							Image:           "gcr.io/factorio2022/mine:latest",
+							ImagePullPolicy: pull,
 							Env: []apiv1.EnvVar{
 								{Name: "ROW", Value: fmt.Sprint(node.Row)},
 								{Name: "COL", Value: fmt.Sprint(node.Col)},
 								{Name: "TYPE", Value: fmt.Sprint(node.Type)},
-								{Name: "DIRECTION", Value: fmt.Sprint(node.Direction)}},
+								{Name: "DIRECTION", Value: fmt.Sprint(node.Direction)},
+								{Name: "local", Value: string(pull)}},
 							Ports: []apiv1.ContainerPort{
 								{
 									Name:          "http",
