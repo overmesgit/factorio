@@ -1,30 +1,61 @@
 package workers
 
 import (
+	"errors"
 	"github.com/overmesgit/factorio/mine"
+	"github.com/overmesgit/factorio/mine/sugar"
 	"time"
 )
 
 type ManipulatorNode struct {
-	node    Node
-	storage mine.Storage
+	nextNode, prevNode Node
+	sender             mine.Sender
 }
+
+var _ WorkerNode = ManipulatorNode{}
 
 func NewManipulator(
-	row, col int32, nodeType Type, direction Direction, production ItemType,
+	nextNode, prevNode Node,
 ) *ManipulatorNode {
-	return &ManipulatorNode{node: NewNode(row, col, nodeType, direction, production)}
+	return &ManipulatorNode{nextNode: nextNode, prevNode: prevNode, sender: mine.NewSender()}
 }
 
-func (m ManipulatorNode) DoWork() {
-	for {
-		neededItem, err := s.askForNeedItem(s.getNextNode())
-		if err == nil {
-			item, err := s.askForItem(s.getPrevNode(), ItemType(Type), false)
-			if err == nil {
-				err = s.sendItem(s.getNextNode(), item)
-			}
+func (n ManipulatorNode) GetNeededResource() (ItemType, error) {
+	return NoItem, errors.New("i'm an manipulator dumb dumb")
+}
+
+func (n ManipulatorNode) GetResourceForSend() (ItemType, error) {
+	return NoItem, errors.New("i'm an manipulator dumb dumb")
+}
+
+func (n ManipulatorNode) ReceiveResource(itemType ItemType) error {
+	return errors.New("i'm an manipulator dumb dumb")
+}
+
+func (n ManipulatorNode) StartWorker() {
+	go func() {
+		n.transitResource()
+	}()
+}
+
+func (n ManipulatorNode) transitResource() {
+	neededItem, err := n.sender.AskForNeedItem(n.nextNode)
+	if err == nil {
+		item, err := n.sender.AskForItem(n.prevNode, neededItem)
+
+		if err != nil {
+			sugar.Sugar.Infof("Error while asking %v for item %v", n.prevNode, err)
+			return
 		}
-		time.Sleep(time.Second)
+		//if store {
+		//err := MyStorage.Add(nodemap.ItemType(r.Type))
+		//}
+
+		err = n.sender.SendItem(n.nextNode, item)
+		if err != nil {
+			sugar.Sugar.Infof("Error while sending %v item %v", n.nextNode, err)
+			return
+		}
 	}
+	time.Sleep(time.Second)
 }

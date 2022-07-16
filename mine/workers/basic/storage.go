@@ -1,41 +1,39 @@
-package workers
+package basic
 
 import (
 	"errors"
 	"fmt"
-	"github.com/overmesgit/factorio/grpc"
 	pb "github.com/overmesgit/factorio/grpc"
+	"github.com/overmesgit/factorio/mine/workers"
 )
 
-var MyStorage = NewStorage()
-
 type Storage struct {
-	itemByType   map[ItemType]chan *grpc.Item
+	itemByType   map[workers.ItemType]chan workers.ItemType
 	totalStorage int
 }
 
-func NewStorage() *Storage {
-	return &Storage{itemByType: make(map[ItemType]chan *grpc.Item), totalStorage: 100}
+func NewStorage() Storage {
+	return Storage{itemByType: make(map[workers.ItemType]chan workers.ItemType), totalStorage: 100}
 }
 
 var storageFull = errors.New("storage full")
 
-func (s *Storage) Add(item ItemType) error {
+func (s *Storage) Add(item workers.ItemType) error {
 	store := s.itemByType[item]
 	if store == nil {
-		store = make(chan *grpc.Item, s.totalStorage)
+		store = make(chan workers.ItemType, s.totalStorage)
 		s.itemByType[item] = store
 	}
 
 	select {
-	case store <- &grpc.Item{Type: string(item)}:
+	case store <- item:
 	default:
 		return storageFull
 	}
 	return nil
 }
 
-func (s *Storage) GetCount(itemType ItemType) int {
+func (s *Storage) GetCount(itemType workers.ItemType) int {
 	val, ok := s.itemByType[itemType]
 	if !ok {
 		return 0
@@ -57,7 +55,7 @@ func (s *Storage) GetItemCount() []*pb.ItemCounter {
 	return res
 }
 
-func (s *Storage) isFull(itemType ItemType) bool {
+func (s *Storage) IsFull(itemType workers.ItemType) bool {
 	ch, ok := s.itemByType[itemType]
 	if !ok {
 		return false
@@ -65,29 +63,29 @@ func (s *Storage) isFull(itemType ItemType) bool {
 	return len(ch) >= s.totalStorage
 }
 
-func (s *Storage) Get(itemType ItemType) *pb.Item {
+func (s *Storage) Get(itemType workers.ItemType) (workers.ItemType, error) {
 	ch, ok := s.itemByType[itemType]
 	if !ok {
-		return nil
+		return workers.NoItem, errors.New(string("storage is empty " + itemType))
 	}
 
 	select {
 	case forSend := <-ch:
-		return forSend
+		return forSend, nil
 	default:
 	}
-	return nil
+	return workers.NoItem, errors.New(string("storage is empty " + itemType))
 }
 
-func (s *Storage) GetAnyItem() *pb.Item {
+func (s *Storage) GetAnyItem() (workers.ItemType, error) {
 	for _, ch := range s.itemByType {
 		select {
 		case forSend := <-ch:
-			return forSend
+			return forSend, nil
 		default:
 		}
 	}
-	return nil
+	return workers.NoItem, errors.New("storage is empty")
 }
 
 func (s Storage) String() string {
