@@ -216,6 +216,11 @@
                 newEl.ondblclick = (event) => {
                     newEl.querySelector('input').focus();
                 }
+                newEl.onclick = (event) => {
+                    if (event.altKey) {
+                        window.open(`/logs/?node=r${row}c${col}`, '_blank').focus();
+                    }
+                }
                 data.append(newEl)
             }
         }
