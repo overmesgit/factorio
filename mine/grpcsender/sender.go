@@ -22,7 +22,7 @@ func NewSender() Sender {
 }
 
 func (s Sender) SendItem(adjNode basic.Node, forSend basic.ItemType) error {
-	sugar.Sugar.Infof("Send items. Current store. %v forSend %v", forSend)
+	sugar.Sugar.Infof("Send items. ForSend %v", forSend)
 
 	conn, err := grpc.Dial(
 		fmt.Sprintf("r%vc%v:8080", adjNode.Row, adjNode.Col),

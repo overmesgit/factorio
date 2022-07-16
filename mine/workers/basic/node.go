@@ -8,7 +8,7 @@ type ItemCounter struct {
 type WorkerNode interface {
 	ReceiveResource(itemType ItemType) error
 	GetNeededResource() (ItemType, error)
-	GetResourceForSend() (ItemType, error)
+	GetResourceForSend(ItemType) (ItemType, error)
 	StartWorker()
 	GetItemCount() []ItemCounter
 }

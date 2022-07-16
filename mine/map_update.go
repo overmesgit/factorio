@@ -46,16 +46,18 @@ func (s *server) UpdateMapState() {
 			},
 		)
 	}
-	r, err := c.UpdateNodeState(
-		ctx, &pb.NodeState{
-			Node: &pb.Node{
-				Type:      string(MyNode.NodeType),
-				Col:       MyNode.Col,
-				Row:       MyNode.Row,
-				Direction: string(MyNode.Direction),
-			},
-			Items: grpcCounter,
+	state := pb.NodeState{
+		Node: &pb.Node{
+			Col:       MyNode.Col,
+			Row:       MyNode.Row,
+			Type:      string(MyNode.NodeType),
+			Direction: string(MyNode.Direction),
 		},
+		Items: grpcCounter,
+	}
+	sugar.Sugar.Infof("Update state with: %v\n", &state)
+	r, err := c.UpdateNodeState(
+		ctx, &state,
 	)
 	if err != nil {
 		sugar.Sugar.Errorf("Could not update my status: %v\n", err)

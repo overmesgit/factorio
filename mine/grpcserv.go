@@ -2,7 +2,6 @@ package mine
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
 	"github.com/overmesgit/factorio/mine/grpcsender"
@@ -31,9 +30,9 @@ func init() {
 	}
 
 	nodeType := basic.Type(os.Getenv("TYPE"))
-	node := basic.NewNode(
-		int32(col),
+	MyNode = basic.NewNode(
 		int32(row),
+		int32(col),
 		nodeType,
 		basic.Direction(os.Getenv("DIRECTION")),
 	)
@@ -43,14 +42,17 @@ func init() {
 	var workerNode basic.WorkerNode
 	switch nodeType {
 	case basic.IronMine:
-		// TODO: move get next node into constructor
-		workerNode = workers.NewMine(node.GetNextNode(), basic.Iron, sender)
+		// TODO: move get next MyNode into constructor
+		workerNode = workers.NewMine(MyNode.GetNextNode(), basic.Iron, sender)
 	case basic.CoalMine:
-		workerNode = workers.NewMine(node.GetNextNode(), basic.Coal, sender)
+		workerNode = workers.NewMine(MyNode.GetNextNode(), basic.Coal, sender)
 	case basic.Furnace:
-		workerNode = workers.NewFurnaceNode(node.GetNextNode(), sender)
+		workerNode = workers.NewFurnaceNode(MyNode.GetNextNode(), sender)
 	case basic.Manipulator:
-		workerNode = workers.NewManipulator(node.GetNextNode(), node.GetPrevNode(), sender)
+		workerNode = workers.NewManipulator(MyNode.GetNextNode(), MyNode.GetPrevNode(), sender)
+	case basic.Belt:
+		workerNode = workers.NewBelt(MyNode.GetNextNode(), sender)
+
 	}
 	MyWorker = workerNode
 
@@ -81,13 +83,13 @@ func (s *server) NeededResource(ctx context.Context, request *pb.Empty) (*pb.Ite
 		return nil, err
 	}
 
-	return &pb.Item{Type: string(item)}, errors.New("nothing needed")
+	return &pb.Item{Type: string(item)}, nil
 }
 
 func (s *server) GetResource(ctx context.Context, request *pb.Item) (*pb.Item, error) {
 	nodemap.LogInput(ctx, "GiveResource", request)
 
-	item, err := MyWorker.GetResourceForSend()
+	item, err := MyWorker.GetResourceForSend(basic.ItemType(request.Type))
 	if err != nil {
 		return nil, err
 	}
@@ -103,6 +105,7 @@ func RunServer() {
 	)
 
 	server := &server{}
+	server.RunMapper()
 	MyWorker.StartWorker()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))

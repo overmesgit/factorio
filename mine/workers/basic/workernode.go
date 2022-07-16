@@ -8,17 +8,16 @@ import (
 
 type BaseWorkerNode struct {
 	*Storage
-	sender     Sender
-	nextNode   Node
-	production ItemType
+	sender   Sender
+	nextNode Node
 }
 
 var _ WorkerNode = BaseWorkerNode{}
 
 func NewWorkerNode(
-	storage *Storage, sender Sender, nextNode Node, production ItemType,
+	storage *Storage, sender Sender, nextNode Node,
 ) BaseWorkerNode {
-	return BaseWorkerNode{Storage: storage, sender: sender, nextNode: nextNode, production: production}
+	return BaseWorkerNode{Storage: storage, sender: sender, nextNode: nextNode}
 }
 
 func (d BaseWorkerNode) ReceiveResource(itemType ItemType) error {
@@ -29,13 +28,19 @@ func (d BaseWorkerNode) GetNeededResource() (ItemType, error) {
 	return "", errors.New("nothing needed")
 }
 
-func (d BaseWorkerNode) GetResourceForSend() (ItemType, error) {
-	item, err := d.Storage.Get(d.production)
+func (d BaseWorkerNode) GetResourceForSend(item ItemType) (ItemType, error) {
+	var forSend ItemType
+	var err error
+	if item == AnyItem {
+		forSend, err = d.Storage.GetAnyItem()
+	} else {
+		forSend, err = d.Storage.Get(item)
+	}
 	if err != nil {
 		sugar.Sugar.Infof("Nothing to give %v.", d.Storage.GetItemCount())
 		return "", err
 	}
-	return item, nil
+	return forSend, nil
 }
 
 func (d BaseWorkerNode) StartWorker() {

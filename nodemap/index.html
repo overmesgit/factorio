@@ -262,7 +262,9 @@
             }
             message.sort()
             let cell = document.querySelector(`.col${node.col}.row${node.row} .node-status`)
-            cell.innerHTML = message.join('\n')
+            if (cell != null) {
+                cell.innerHTML = message.join('\n')
+            }
         }
         if (response.status !== 200) {
             console.log("resp from server", response, data)

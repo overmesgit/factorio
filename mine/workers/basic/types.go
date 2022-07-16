@@ -25,4 +25,5 @@ const (
 	Coal      ItemType = "COAL"
 	IronPlate ItemType = "IR_PL"
 	NoItem    ItemType = "NoItem"
+	AnyItem   ItemType = "AnyItem"
 )

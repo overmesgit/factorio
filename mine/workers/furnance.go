@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"github.com/overmesgit/factorio/mine/sugar"
 	"github.com/overmesgit/factorio/mine/workers/basic"
 	"time"
 )
@@ -22,7 +23,6 @@ func NewFurnaceNode(
 		&res.storage,
 		sender,
 		nextNode,
-		basic.IronPlate,
 	)
 	return res
 }
@@ -49,6 +49,15 @@ func (n FurnaceNode) melt() {
 		storage.Get(basic.Coal)
 		storage.Add(basic.IronPlate)
 	}
+}
+
+func (n FurnaceNode) GetResourceForSend(basic.ItemType) (basic.ItemType, error) {
+	item, err := n.Storage.Get(basic.IronPlate)
+	if err != nil {
+		sugar.Sugar.Infof("Nothing to give %v.", n.Storage.GetItemCount())
+		return "", err
+	}
+	return item, nil
 }
 
 func (n FurnaceNode) GetNeededResource() (basic.ItemType, error) {

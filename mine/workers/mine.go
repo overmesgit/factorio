@@ -25,7 +25,6 @@ func NewMine(
 		&res.storage,
 		sender,
 		nextNode,
-		production,
 	)
 	return res
 }
