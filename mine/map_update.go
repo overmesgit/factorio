@@ -3,6 +3,7 @@ package mine
 import (
 	"context"
 	pb "github.com/overmesgit/factorio/grpc"
+	"github.com/overmesgit/factorio/mine/sugar"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"os"
@@ -23,10 +24,10 @@ func (s *server) UpdateMapState() {
 	if os.Getenv("local") != "" {
 		url = "host.minikube.internal:8080"
 	}
-	sugar.Infof("Map url %v", url)
+	sugar.Sugar.Infof("Map url %v", url)
 	conn, err := grpc.Dial(url, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		Sugar.Errorw("failed to connect: %v", err)
+		sugar.Sugar.Errorw("failed to connect: %v", err)
 		return
 	}
 	defer conn.Close()
@@ -35,15 +36,30 @@ func (s *server) UpdateMapState() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
+	counter := MyWorker.GetItemCount()
+	grpcCounter := make([]*pb.ItemCounter, 0, len(counter))
+	for _, c := range counter {
+		grpcCounter = append(
+			grpcCounter, &pb.ItemCounter{
+				Type:  c.Type,
+				Count: c.Count,
+			},
+		)
+	}
 	r, err := c.UpdateNodeState(
 		ctx, &pb.NodeState{
-			Node:  MyNode,
-			Items: MyStorage.GetItemCount(),
+			Node: &pb.Node{
+				Type:      string(MyNode.NodeType),
+				Col:       MyNode.Col,
+				Row:       MyNode.Row,
+				Direction: string(MyNode.Direction),
+			},
+			Items: grpcCounter,
 		},
 	)
 	if err != nil {
-		Sugar.Errorf("Could not update my status: %v\n", err)
+		sugar.Sugar.Errorf("Could not update my status: %v\n", err)
 		return
 	}
-	Sugar.Infof("Response: %v\n", r)
+	sugar.Sugar.Infof("Response: %v\n", r)
 }

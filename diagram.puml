@@ -2,7 +2,9 @@
 'https://plantuml.com/component-diagram
 
 'TODO:
-'improve map: add delete
+'improve reliability (don't lost items)
+'chaos monkey (cpu, network, connections)
+'improve map: add delete, logs, icons
 'factory node
 'next tile factory
 'custom level for each title

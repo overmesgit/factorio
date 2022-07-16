@@ -1,4 +1,4 @@
-package mine
+package grpcsender
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
 	"github.com/overmesgit/factorio/mine/sugar"
-	"github.com/overmesgit/factorio/mine/workers"
+	"github.com/overmesgit/factorio/mine/workers/basic"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"time"
@@ -15,11 +15,13 @@ import (
 type Sender struct {
 }
 
+var _ basic.Sender = Sender{}
+
 func NewSender() Sender {
 	return Sender{}
 }
 
-func (s *Sender) SendItem(adjNode workers.Node, forSend workers.ItemType) error {
+func (s Sender) SendItem(adjNode basic.Node, forSend basic.ItemType) error {
 	sugar.Sugar.Infof("Send items. Current store. %v forSend %v", forSend)
 
 	conn, err := grpc.Dial(
@@ -35,7 +37,7 @@ func (s *Sender) SendItem(adjNode workers.Node, forSend workers.ItemType) error 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := c.SendResource(ctx, &pb.Item{Type: string(forSend)})
+	r, err := c.ReceiveResource(ctx, &pb.Item{Type: string(forSend)})
 	if err != nil {
 		return err
 	}
@@ -44,9 +46,9 @@ func (s *Sender) SendItem(adjNode workers.Node, forSend workers.ItemType) error 
 	return nil
 }
 
-func (s *Sender) AskForItem(
-	prevNode workers.Node, itemType workers.ItemType,
-) (workers.ItemType, error) {
+func (s Sender) AskForItem(
+	prevNode basic.Node, itemType basic.ItemType,
+) (basic.ItemType, error) {
 	sugar.Sugar.Infof("Ask for item %v %v", prevNode, itemType)
 
 	conn, err := grpc.Dial(
@@ -54,7 +56,7 @@ func (s *Sender) AskForItem(
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return workers.NoItem, errors.New(fmt.Sprintf("did not connect: %v", err))
+		return basic.NoItem, errors.New(fmt.Sprintf("did not connect: %v", err))
 	}
 	defer conn.Close()
 	c := pb.NewMineClient(conn)
@@ -62,15 +64,15 @@ func (s *Sender) AskForItem(
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := c.GiveResource(ctx, &pb.Item{Type: string(itemType)})
+	r, err := c.GetResource(ctx, &pb.Item{Type: string(itemType)})
 	if err != nil {
-		return workers.NoItem, err
+		return basic.NoItem, err
 	}
 
-	return workers.ItemType(r.Type), nil
+	return basic.ItemType(r.Type), nil
 }
 
-func (s *Sender) AskForNeedItem(nextNode workers.Node) (workers.ItemType, error) {
+func (s Sender) AskForNeedItem(nextNode basic.Node) (basic.ItemType, error) {
 	sugar.Sugar.Infof("Ask for needed item %v", nextNode)
 
 	conn, err := grpc.Dial(
@@ -78,7 +80,7 @@ func (s *Sender) AskForNeedItem(nextNode workers.Node) (workers.ItemType, error)
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return workers.NoItem, errors.New(fmt.Sprintf("did not connect: %v", err))
+		return basic.NoItem, errors.New(fmt.Sprintf("did not connect: %v", err))
 	}
 	defer conn.Close()
 	c := pb.NewMineClient(conn)
@@ -88,7 +90,7 @@ func (s *Sender) AskForNeedItem(nextNode workers.Node) (workers.ItemType, error)
 
 	item, err := c.NeededResource(ctx, &pb.Empty{})
 	if err != nil {
-		return workers.NoItem, err
+		return basic.NoItem, err
 	}
-	return workers.ItemType(item.Type), err
+	return basic.ItemType(item.Type), err
 }

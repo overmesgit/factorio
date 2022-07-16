@@ -1,33 +1,28 @@
 package workers
 
 import (
-	"github.com/overmesgit/factorio/mine"
 	"github.com/overmesgit/factorio/mine/workers/basic"
 	"time"
 )
 
 type FurnaceNode struct {
 	storage basic.Storage
-	basic.WorkerNode
+	basic.BaseWorkerNode
 }
 
-var _ WorkerNode = FurnaceNode{}
+var _ basic.WorkerNode = FurnaceNode{}
 
 func NewFurnaceNode(
-	nextNode Node,
+	nextNode basic.Node, sender basic.Sender,
 ) FurnaceNode {
 	res := FurnaceNode{
 		storage: basic.NewStorage(),
 	}
-	sender := basic.NewSender(
-		&res.storage,
-		mine.NewSender(),
-		nextNode,
-	)
-	res.WorkerNode = basic.NewWorkerNode(
+	res.BaseWorkerNode = basic.NewWorkerNode(
 		&res.storage,
 		sender,
-		IronPlate,
+		nextNode,
+		basic.IronPlate,
 	)
 	return res
 }
@@ -41,25 +36,25 @@ func (n FurnaceNode) melt() {
 	for {
 		time.Sleep(time.Second)
 		storage := n.storage
-		if storage.GetCount(Iron) == 0 || storage.GetCount(Coal) == 0 {
+		if storage.GetCount(basic.Iron) == 0 || storage.GetCount(basic.Coal) == 0 {
 			continue
 		}
 
-		if storage.IsFull(IronPlate) {
+		if storage.IsFull(basic.IronPlate) {
 			continue
 		}
 
 		// TODO: errors
-		storage.Get(Iron)
-		storage.Get(Coal)
-		storage.Add(IronPlate)
+		storage.Get(basic.Iron)
+		storage.Get(basic.Coal)
+		storage.Add(basic.IronPlate)
 	}
 }
 
-func (n FurnaceNode) GetNeededResource() (ItemType, error) {
-	if n.storage.GetCount(Iron) > n.storage.GetCount(Coal) {
-		return Coal, nil
+func (n FurnaceNode) GetNeededResource() (basic.ItemType, error) {
+	if n.storage.GetCount(basic.Iron) > n.storage.GetCount(basic.Coal) {
+		return basic.Coal, nil
 	} else {
-		return Iron, nil
+		return basic.Iron, nil
 	}
 }

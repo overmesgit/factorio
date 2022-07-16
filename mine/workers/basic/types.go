@@ -1,4 +1,4 @@
-package workers
+package basic
 
 type Type string
 type Direction string

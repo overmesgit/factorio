@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
+	"github.com/overmesgit/factorio/mine/grpcsender"
 	"github.com/overmesgit/factorio/mine/sugar"
 	"github.com/overmesgit/factorio/mine/workers"
+	"github.com/overmesgit/factorio/mine/workers/basic"
 	"github.com/overmesgit/factorio/nodemap"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -28,31 +30,34 @@ func init() {
 		panic(err)
 	}
 
-	nodeType := workers.Type(os.Getenv("TYPE"))
-	node := workers.NewNode(
+	nodeType := basic.Type(os.Getenv("TYPE"))
+	node := basic.NewNode(
 		int32(col),
 		int32(row),
 		nodeType,
-		workers.Direction(os.Getenv("DIRECTION")),
+		basic.Direction(os.Getenv("DIRECTION")),
 	)
 
-	var workerNode workers.WorkerNode
+	sender := grpcsender.NewSender()
+
+	var workerNode basic.WorkerNode
 	switch nodeType {
-	case workers.IronMine:
-		workerNode = workers.NewMine(node.GetNextNode(), workers.Iron)
-	case workers.CoalMine:
-		workerNode = workers.NewMine(node.GetNextNode(), workers.Coal)
-	case workers.Furnace:
-		workerNode = workers.NewFurnaceNode(node.GetNextNode())
-	case workers.Manipulator:
-		workerNode = workers.NewManipulator(node.GetNextNode(), node.GetPrevNode())
+	case basic.IronMine:
+		// TODO: move get next node into constructor
+		workerNode = workers.NewMine(node.GetNextNode(), basic.Iron, sender)
+	case basic.CoalMine:
+		workerNode = workers.NewMine(node.GetNextNode(), basic.Coal, sender)
+	case basic.Furnace:
+		workerNode = workers.NewFurnaceNode(node.GetNextNode(), sender)
+	case basic.Manipulator:
+		workerNode = workers.NewManipulator(node.GetNextNode(), node.GetPrevNode(), sender)
 	}
 	MyWorker = workerNode
 
 }
 
-var MyWorker workers.WorkerNode
-var MyNode workers.Node
+var MyWorker basic.WorkerNode
+var MyNode basic.Node
 
 type server struct {
 	pb.UnimplementedMineServer
@@ -61,7 +66,7 @@ type server struct {
 func (s *server) ReceiveResource(ctx context.Context, request *pb.Item) (*pb.Empty, error) {
 	nodemap.LogInput(ctx, "SendResource", request)
 
-	err := MyWorker.ReceiveResource(workers.ItemType(request.Type))
+	err := MyWorker.ReceiveResource(basic.ItemType(request.Type))
 	if err != nil {
 		return nil, err
 	}

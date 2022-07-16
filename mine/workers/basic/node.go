@@ -1,23 +1,35 @@
-package workers
+package basic
+
+type ItemCounter struct {
+	Type  string
+	Count int64
+}
 
 type WorkerNode interface {
 	ReceiveResource(itemType ItemType) error
 	GetNeededResource() (ItemType, error)
 	GetResourceForSend() (ItemType, error)
 	StartWorker()
+	GetItemCount() []ItemCounter
+}
+
+type Sender interface {
+	SendItem(adjNode Node, forSend ItemType) error
+	AskForItem(prevNode Node, itemType ItemType) (ItemType, error)
+	AskForNeedItem(nextNode Node) (ItemType, error)
 }
 
 type Node struct {
 	Row, Col  int32
-	nodeType  Type
-	direction Direction
+	NodeType  Type
+	Direction Direction
 }
 
 func NewNode(
 	row, col int32, nodeType Type, direction Direction,
 ) Node {
-	return Node{Row: row, Col: col, nodeType: nodeType,
-		direction: direction}
+	return Node{Row: row, Col: col, NodeType: nodeType,
+		Direction: direction}
 }
 
 var directionIndex = map[Direction][]int32{
@@ -36,7 +48,7 @@ func (n *Node) GetPrevNode() Node {
 }
 
 func (n *Node) GetNextNode() Node {
-	offset, ok := directionIndex[n.direction]
+	offset, ok := directionIndex[n.Direction]
 	if !ok {
 		offset = []int32{1, 0}
 	}

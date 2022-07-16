@@ -2,33 +2,37 @@ package workers
 
 import (
 	"errors"
-	"github.com/overmesgit/factorio/mine"
 	"github.com/overmesgit/factorio/mine/sugar"
+	"github.com/overmesgit/factorio/mine/workers/basic"
 	"time"
 )
 
 type ManipulatorNode struct {
-	nextNode, prevNode Node
-	sender             mine.Sender
+	nextNode, prevNode basic.Node
+	sender             basic.Sender
 }
 
-var _ WorkerNode = ManipulatorNode{}
+var _ basic.WorkerNode = ManipulatorNode{}
 
 func NewManipulator(
-	nextNode, prevNode Node,
+	nextNode, prevNode basic.Node, sender basic.Sender,
 ) *ManipulatorNode {
-	return &ManipulatorNode{nextNode: nextNode, prevNode: prevNode, sender: mine.NewSender()}
+	return &ManipulatorNode{nextNode: nextNode, prevNode: prevNode, sender: sender}
 }
 
-func (n ManipulatorNode) GetNeededResource() (ItemType, error) {
-	return NoItem, errors.New("i'm an manipulator dumb dumb")
+func (n ManipulatorNode) GetItemCount() []basic.ItemCounter {
+	return nil
 }
 
-func (n ManipulatorNode) GetResourceForSend() (ItemType, error) {
-	return NoItem, errors.New("i'm an manipulator dumb dumb")
+func (n ManipulatorNode) GetNeededResource() (basic.ItemType, error) {
+	return basic.NoItem, errors.New("i'm an manipulator dumb dumb")
 }
 
-func (n ManipulatorNode) ReceiveResource(itemType ItemType) error {
+func (n ManipulatorNode) GetResourceForSend() (basic.ItemType, error) {
+	return basic.NoItem, errors.New("i'm an manipulator dumb dumb")
+}
+
+func (n ManipulatorNode) ReceiveResource(itemType basic.ItemType) error {
 	return errors.New("i'm an manipulator dumb dumb")
 }
 

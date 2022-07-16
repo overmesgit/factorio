@@ -1,35 +1,30 @@
 package workers
 
 import (
-	"github.com/overmesgit/factorio/mine"
 	"github.com/overmesgit/factorio/mine/sugar"
 	"github.com/overmesgit/factorio/mine/workers/basic"
 	"time"
 )
 
 type Mine struct {
-	production ItemType
+	production basic.ItemType
 	storage    basic.Storage
-	basic.WorkerNode
+	basic.BaseWorkerNode
 }
 
-var _ WorkerNode = Mine{}
+var _ basic.WorkerNode = Mine{}
 
 func NewMine(
-	nextNode Node, production ItemType,
+	nextNode basic.Node, production basic.ItemType, sender basic.Sender,
 ) Mine {
 	res := Mine{
 		production: production,
 		storage:    basic.NewStorage(),
 	}
-	sender := basic.NewSender(
-		&res.storage,
-		mine.NewSender(),
-		nextNode,
-	)
-	res.WorkerNode = basic.NewWorkerNode(
+	res.BaseWorkerNode = basic.NewWorkerNode(
 		&res.storage,
 		sender,
+		nextNode,
 		production,
 	)
 	return res
