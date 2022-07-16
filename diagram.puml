@@ -1,6 +1,9 @@
 @startuml
 'https://plantuml.com/component-diagram
 
+'TODO:
+'improve map: add delete
+'factory node
 'next tile factory
 'custom level for each title
 

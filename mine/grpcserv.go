@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	pb "github.com/overmesgit/factorio/grpc"
+	"github.com/overmesgit/factorio/mine/sugar"
+	"github.com/overmesgit/factorio/mine/workers"
 	"github.com/overmesgit/factorio/nodemap"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -13,11 +15,9 @@ import (
 	"strconv"
 )
 
-var sugar *zap.SugaredLogger
-
 func init() {
 	logger, _ := zap.NewProduction()
-	sugar = logger.Sugar()
+	sugar.Sugar = logger.Sugar()
 
 	col, err := strconv.Atoi(os.Getenv("COL"))
 	if err != nil {
@@ -27,28 +27,41 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	MyNode = &pb.Node{
-		Type:      os.Getenv("TYPE"),
-		Col:       int32(col),
-		Row:       int32(row),
-		Direction: os.Getenv("DIRECTION"),
+
+	nodeType := workers.Type(os.Getenv("TYPE"))
+	node := workers.NewNode(
+		int32(col),
+		int32(row),
+		nodeType,
+		workers.Direction(os.Getenv("DIRECTION")),
+	)
+
+	var workerNode workers.WorkerNode
+	switch nodeType {
+	case workers.IronMine:
+		workerNode = workers.NewMine(node.GetNextNode(), workers.Iron)
+	case workers.CoalMine:
+		workerNode = workers.NewMine(node.GetNextNode(), workers.Coal)
+	case workers.Furnace:
+		workerNode = workers.NewFurnaceNode(node.GetNextNode())
+	case workers.Manipulator:
+		workerNode = workers.NewManipulator(node.GetNextNode(), node.GetPrevNode())
 	}
+	MyWorker = workerNode
+
 }
 
-var MyNode *pb.Node
+var MyWorker workers.WorkerNode
+var MyNode workers.Node
 
 type server struct {
 	pb.UnimplementedMineServer
 }
 
-func (s *server) SendResource(ctx context.Context, request *pb.Item) (*pb.Empty, error) {
+func (s *server) ReceiveResource(ctx context.Context, request *pb.Item) (*pb.Empty, error) {
 	nodemap.LogInput(ctx, "SendResource", request)
 
-	if nodemap.Type(MyNode.Type) == nodemap.Manipulator {
-		return nil, errors.New("i'm an manipulator dumb dumb")
-	}
-
-	err := MyStorage.Add(nodemap.ItemType(request.Type))
+	err := MyWorker.ReceiveResource(workers.ItemType(request.Type))
 	if err != nil {
 		return nil, err
 	}
@@ -58,54 +71,51 @@ func (s *server) SendResource(ctx context.Context, request *pb.Item) (*pb.Empty,
 
 func (s *server) NeededResource(ctx context.Context, request *pb.Empty) (*pb.Item, error) {
 	nodemap.LogInput(ctx, "NeededResource", request)
-	if nodemap.Type(MyNode.Type) == nodemap.Furnace {
-		if MyStorage.GetCount(nodemap.Iron) > MyStorage.GetCount(nodemap.Coal) {
-			return &pb.Item{Type: string(nodemap.Coal)}, nil
-		} else {
-			return &pb.Item{Type: string(nodemap.Iron)}, nil
-		}
+	item, err := MyWorker.GetNeededResource()
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, errors.New("nothing needed")
+	return &pb.Item{Type: string(item)}, errors.New("nothing needed")
 }
 
-func (s *server) GiveResource(ctx context.Context, request *pb.Item) (*pb.Item, error) {
+func (s *server) GetResource(ctx context.Context, request *pb.Item) (*pb.Item, error) {
 	nodemap.LogInput(ctx, "GiveResource", request)
-	item := MyStorage.Get(nodemap.ItemType(request.GetType()))
-	if item == nil {
-		sugar.Infof("Nothing to give %v.", MyStorage.GetItemCount())
-		return nil, errors.New("nothing to give")
+
+	item, err := MyWorker.GetResourceForSend()
+	if err != nil {
+		return nil, err
 	}
-	return item, nil
+
+	return &pb.Item{Type: string(item)}, nil
 }
 
 func RunServer() {
 	port := "8080"
-	sugar.Infow(
+	sugar.Sugar.Infow(
 		"Starting mine server",
 		"port", port,
 	)
 
 	server := &server{}
-	server.RunMapper()
-	server.RunWorker()
+	MyWorker.StartWorker()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))
 	if err != nil {
-		sugar.Fatalw(
+		sugar.Sugar.Fatalw(
 			"Failed to listen",
 			"error", err,
 		)
 	}
 	s := grpc.NewServer()
 	pb.RegisterMineServer(s, server)
-	sugar.Infow(
+	sugar.Sugar.Infow(
 		"server started",
 		"port", port,
 		"addr", lis.Addr(),
 	)
 	if err := s.Serve(lis); err != nil {
-		sugar.Fatalw(
+		sugar.Sugar.Fatalw(
 			"Server failed",
 			"error", err,
 		)

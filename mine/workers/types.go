@@ -1,4 +1,4 @@
-package nodemap
+package workers
 
 type Type string
 type Direction string
@@ -9,6 +9,7 @@ const (
 	Left  Direction = "<"
 	Right Direction = ">"
 )
+
 const (
 	IronMine    Type = "MI"
 	CoalMine    Type = "MC"
@@ -23,4 +24,5 @@ const (
 	Iron      ItemType = "IRON"
 	Coal      ItemType = "COAL"
 	IronPlate ItemType = "IR_PL"
+	NoItem    ItemType = "NoItem"
 )
