@@ -11,11 +11,11 @@ const (
 )
 
 const (
-	IronMine    Type = "MI"
-	CoalMine    Type = "MC"
-	Belt        Type = "BE"
-	Furnace     Type = "FU"
-	Manipulator Type = "MA"
+	Mine              Type = "MINE"
+	Belt              Type = "BELT"
+	Furnace           Type = "FURNACE"
+	Manipulator       Type = "MANIPULATOR"
+	AssemblingMachine Type = "ASSEMBLING_MACHINE"
 )
 
 type ItemType string
@@ -23,7 +23,10 @@ type ItemType string
 const (
 	Iron      ItemType = "IRON"
 	Coal      ItemType = "COAL"
+	Copper    ItemType = "COPPER"
 	IronPlate ItemType = "IR_PL"
-	NoItem    ItemType = "NoItem"
-	AnyItem   ItemType = "AnyItem"
+	IronGear  ItemType = "IR_GE"
+
+	NoItem  ItemType = "NoItem"
+	AnyItem ItemType = "AnyItem"
 )

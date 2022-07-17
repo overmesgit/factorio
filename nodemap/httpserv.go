@@ -59,6 +59,10 @@ func RunHttpServer() {
 		},
 	)
 
+	http.Handle(
+		"/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./nodemap/static"))),
+	)
+
 	http.HandleFunc(
 		"/", func(w http.ResponseWriter, r *http.Request) {
 			indexTemplate, parseError := template.ParseFiles("nodemap/index.html")

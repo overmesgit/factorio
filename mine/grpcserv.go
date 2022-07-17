@@ -30,6 +30,7 @@ func init() {
 	}
 
 	nodeType := basic.Type(os.Getenv("TYPE"))
+	nodeProduction := basic.Type(os.Getenv("PRODUCTION"))
 	MyNode = basic.NewNode(
 		int32(row),
 		int32(col),
@@ -41,11 +42,9 @@ func init() {
 
 	var workerNode basic.WorkerNode
 	switch nodeType {
-	case basic.IronMine:
+	case basic.Mine:
 		// TODO: move get next MyNode into constructor
-		workerNode = workers.NewMine(MyNode.GetNextNode(), basic.Iron, sender)
-	case basic.CoalMine:
-		workerNode = workers.NewMine(MyNode.GetNextNode(), basic.Coal, sender)
+		workerNode = workers.NewMine(MyNode.GetNextNode(), basic.ItemType(nodeProduction), sender)
 	case basic.Furnace:
 		workerNode = workers.NewFurnaceNode(MyNode.GetNextNode(), sender)
 	case basic.Manipulator:

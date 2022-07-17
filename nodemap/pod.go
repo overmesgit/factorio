@@ -86,6 +86,7 @@ func createDeployment(node *pb.Node) {
 								{Name: "ROW", Value: fmt.Sprint(node.Row)},
 								{Name: "COL", Value: fmt.Sprint(node.Col)},
 								{Name: "TYPE", Value: fmt.Sprint(node.Type)},
+								{Name: "PRODUCTION", Value: fmt.Sprint(node.Production)},
 								{Name: "DIRECTION", Value: fmt.Sprint(node.Direction)},
 								{Name: "local", Value: string(pull)}},
 							Ports: []apiv1.ContainerPort{
