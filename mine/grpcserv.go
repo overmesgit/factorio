@@ -41,17 +41,22 @@ func init() {
 	sender := grpcsender.NewSender()
 
 	var workerNode basic.WorkerNode
+	nextNode := MyNode.GetNextNode()
+	prevNode := MyNode.GetPrevNode()
 	switch nodeType {
 	case basic.Mine:
 		// TODO: move get next MyNode into constructor
-		workerNode = workers.NewMine(MyNode.GetNextNode(), basic.ItemType(nodeProduction), sender)
+		workerNode = workers.NewMine(nextNode, basic.ItemType(nodeProduction), sender)
 	case basic.Furnace:
-		workerNode = workers.NewFurnaceNode(MyNode.GetNextNode(), sender)
+		workerNode = workers.NewFurnaceNode(nextNode, sender)
 	case basic.Manipulator:
-		workerNode = workers.NewManipulator(MyNode.GetNextNode(), MyNode.GetPrevNode(), sender)
+		workerNode = workers.NewManipulator(nextNode, prevNode, sender)
 	case basic.Belt:
-		workerNode = workers.NewBelt(MyNode.GetNextNode(), sender)
-
+		workerNode = workers.NewBelt(nextNode, sender)
+	case basic.AssemblingMachine:
+		workerNode = workers.NewAssemblingMachine(
+			nextNode, basic.ItemType(nodeProduction), sender,
+		)
 	}
 	MyWorker = workerNode
 

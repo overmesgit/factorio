@@ -83,43 +83,51 @@
 <div id="header" class="head-container"></div>
 <div id="left" class="left-container"></div>
 <div id="data" class="map-container"></div>
+<div id="buildings" style="position: fixed; right: 100px; top: 50px;"></div>
 
-<div style="position: fixed; right: 100px; top: 50px;">
-  <div class="building" data-type="MINE" data-prod="IRON" style="position: relative">
-    <img style="image-rendering: pixelated; height: 64px; width: 64px;"
-         src="/static/mine.png">
-    <img style="position: absolute; top: 30px; left: 30px; border: 1px solid black;"
-         src="/static/ore.png">
-    <img class="triangle" style="position: absolute; top: 0; left: 0;"
-         src="/static/triangle2.png">
-  </div>
-  <div class="building" data-type="MINE" data-prod="COAL" style="position: relative">
-    <img style="image-rendering: pixelated; height: 64px; width: 64px;"
-         src="/static/mine.png">
-    <img style="position: absolute; top: 30px; left: 30px; border: 1px solid black;"
-         src="/static/coal.png">
-    <img class="triangle" style="position: absolute; top: 0; left: 0;"
-         src="/static/triangle2.png">
-  </div>
-  <div class="building" data-type="BELT" data-prod="NoItem" style="position: relative">
-    <img style="image-rendering: pixelated; height: 64px; width: 64px;"
-         src="/static/belt.png">
-    <img class="triangle" style="position: absolute; top: 0; left: 0;"
-         src="/static/triangle2.png">
-  </div>
-  <div class="building" data-type="FURNACE" data-prod="IR_PL" style="position: relative">
-    <img style="image-rendering: pixelated; height: 64px; width: 64px;"
-         src="/static/furnace.png">
-    <img class="triangle" style="position: absolute; top: 0; left: 0;"
-         src="/static/triangle2.png">
-  </div>
-  <div class="building" data-type="MANIPULATOR" data-prod="NoItem" style="position: relative">
-    <img style="image-rendering: pixelated; height: 64px; width: 64px;"
-         src="/static/manipulator.png">
-    <img class="triangle" style="position: absolute; top: 0; left: 0;"
-         src="/static/triangle2.png">
-  </div>
-</div>
+<script>
+    function buildingInit() {
+        let buildings = [
+            {type: "MINE", img: "/static/mine.png", prod: "IRON", prod_img: "/static/ore.png"},
+            {type: "MINE", img: "/static/mine.png", prod: "COAL", prod_img: "/static/coal.png"},
+            {
+                type: "FURNACE",
+                img: "/static/furnace.png",
+                prod: "IR_PL",
+                prod_img: "/static/iron_plate.png"
+            },
+            {type: "MANIPULATOR", img: "/static/manipulator.png", prod: "NoItem"},
+            {type: "BELT", img: "/static/belt.png", prod: "NoItem"},
+            {type: "ASSEMBLING_MACHINE", img: "/static/assembling.png", prod: "GEAR", prod_img: "/static/gear.png"},
+        ]
+        let buildingsEl = document.querySelector('#buildings')
+        for (const b of buildings) {
+            let el = document.createElement('div')
+
+            let prodTag = '';
+            if (b.prod_img) {
+                prodTag = `
+                <img style="position: absolute; top: 30px; left: 30px; border: 1px solid black;"
+               src="${b.prod_img}">
+                `
+            }
+
+            el.innerHTML = `
+        <div class="building" data-type="${b.type}" data-prod="${b.prod}" style="position: relative">
+          <img style="image-rendering: pixelated; height: 64px; width: 64px;"
+               src="${b.img}">
+          ${prodTag}
+          <img class="triangle" style="position: absolute; top: 0; left: 0;"
+               src="/static/triangle2.png">
+        </div>
+        `
+            buildingsEl.append(el)
+        }
+    }
+
+    buildingInit()
+</script>
+
 
 <script>
     let buildings = document.querySelectorAll(".building");
@@ -145,8 +153,8 @@
         if (currentBuilding != null) {
             currentBuilding.style.display = "initial";
             if (counter % 5) {
-                currentBuilding.style.left = e.pageX + 10 + 'px';
-                currentBuilding.style.top = e.pageY + 10 + 'px';
+                currentBuilding.style.top = e.screenY - 50 + 'px';
+                currentBuilding.style.left = e.screenX + 10 + 'px';
             }
             counter += 1;
         }
@@ -207,11 +215,9 @@
             if (event.key === 'c' && ctrl) {
                 ctrl = false
                 copiedRange = currentRange
-                console.log('copy', currentRange)
             }
             if (event.key === 'v' && ctrl) {
                 ctrl = false
-                console.log('past', copiedRange)
                 if (copiedRange && currentRange) {
                     let start = copiedRange[0], end = copiedRange[1]
                     for (let ri = start[0]; ri <= end[0]; ri++) {
@@ -247,7 +253,6 @@
         }
 
         container.onmouseup = (event) => {
-            console.log(event)
             startNode = null
         }
 
@@ -261,7 +266,6 @@
                 if (counter % 5 === 0) {
                     return
                 }
-                console.log(startNode, endNode)
                 currentRange = [startNode, endNode]
 
                 for (let ri = startNode[0]; ri <= endNode[0]; ri++) {

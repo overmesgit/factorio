@@ -25,7 +25,7 @@ const (
 	Coal      ItemType = "COAL"
 	Copper    ItemType = "COPPER"
 	IronPlate ItemType = "IR_PL"
-	IronGear  ItemType = "IR_GE"
+	IronGear  ItemType = "GEAR"
 
 	NoItem  ItemType = "NoItem"
 	AnyItem ItemType = "AnyItem"

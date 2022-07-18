@@ -28,7 +28,6 @@ func NewFurnaceNode(
 }
 
 func (n FurnaceNode) StartWorker() {
-	go n.SendItems()
 	go n.melt()
 }
 
