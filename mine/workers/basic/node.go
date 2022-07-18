@@ -34,7 +34,7 @@ func NewNode(
 
 var directionIndex = map[Direction][]int32{
 	//  ROW / COL
-	"A": {-1, 0},
+	"^": {-1, 0},
 	"V": {1, 0},
 	"<": {0, -1},
 	">": {0, 1},

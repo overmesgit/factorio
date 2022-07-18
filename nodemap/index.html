@@ -244,7 +244,6 @@
 
             nodeEl.classList.add("selected")
             currentRange = [[row, col], [row, col]]
-            nodeEl.querySelector('input').focus()
         }
 
         container.onmouseup = (event) => {
@@ -363,13 +362,15 @@
             }
             store.sort()
             let cell = document.querySelector(`.col${node.col}.row${node.row} .building`)
-            let statusNode = cell.querySelector('.status');
-            if (statusNode == null) {
-                statusNode = document.createElement('div');
-                statusNode.classList.add('status')
-                cell.prepend(statusNode)
+            if (cell != null) {
+                let statusNode = cell.querySelector('.status');
+                if (statusNode == null) {
+                    statusNode = document.createElement('div');
+                    statusNode.classList.add('status')
+                    cell.prepend(statusNode)
+                }
+                statusNode.innerHTML = store.join('\n')
             }
-            statusNode.innerHTML = store.join('\n')
         }
         if (response.status !== 200) {
             console.log("resp from server", response, data)

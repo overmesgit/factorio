@@ -72,6 +72,7 @@ func (d BaseWorkerNode) SendItemFromStore() error {
 		d.nextNode, forSend,
 	)
 	if err != nil {
+		sugar.Sugar.Warnf("Could send item %v to %v: %v", forSend, d.nextNode, err)
 		err := d.Storage.Add(forSend)
 		if err != nil {
 			sugar.Sugar.Warnf("Could not stack item back %v %v", forSend, err)
