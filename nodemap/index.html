@@ -59,6 +59,15 @@
       }
 
       .status {
+          visibility: hidden;
+          font-size: 12px;
+          position: absolute;
+          color: white;
+          font-weight: bold;
+      }
+
+      .usage {
+          visibility: hidden;
           font-size: 12px;
           position: absolute;
           color: white;
@@ -98,7 +107,12 @@
             },
             {type: "MANIPULATOR", img: "/static/manipulator.png", prod: "NoItem"},
             {type: "BELT", img: "/static/belt.png", prod: "NoItem"},
-            {type: "ASSEMBLING_MACHINE", img: "/static/assembling.png", prod: "GEAR", prod_img: "/static/gear.png"},
+            {
+                type: "ASSEMBLING_MACHINE",
+                img: "/static/assembling.png",
+                prod: "GEAR",
+                prod_img: "/static/gear.png"
+            },
         ]
         let buildingsEl = document.querySelector('#buildings')
         for (const b of buildings) {
@@ -215,6 +229,24 @@
             if (event.key === 'c' && ctrl) {
                 ctrl = false
                 copiedRange = currentRange
+            }
+
+            let visibility = (selector, value) => {
+                let elems = document.querySelectorAll(selector);
+                elems.forEach((elem) => {
+                    elem.style.visibility = value;
+                })
+            }
+            if (event.key === '1') {
+                visibility('.status,.usage', 'hidden')
+            }
+            if (event.key === '2') {
+                visibility('.status,.usage', 'hidden')
+                visibility('.status', 'visible')
+            }
+            if (event.key === '3') {
+                visibility('.status,.usage', 'hidden')
+                visibility('.usage', 'visible')
             }
             if (event.key === 'v' && ctrl) {
                 ctrl = false
@@ -374,6 +406,24 @@
                     cell.prepend(statusNode)
                 }
                 statusNode.innerHTML = store.join('\n')
+
+                let nodeUsage = cell.querySelector('.usage');
+                if (nodeUsage == null) {
+                    nodeUsage = document.createElement('div');
+                    nodeUsage.classList.add('usage')
+                    cell.prepend(nodeUsage)
+                }
+                // "node_stats":{"cpu_load":4.7417445,"memory_usage":4195976,"network_rx":1677,"network_tx":2318}
+                let nodeStats = nodeData.node_stats
+
+                let round = (val) => {
+                    return (val || 0.0).toFixed(0)
+                }
+
+                nodeUsage.innerHTML = `cpu:${round(nodeStats.cpu_load)}\n
+                mem:${round(nodeStats.memory_usage / 1_000_000)}Mb\n
+                in:${round(nodeStats.network_rx / 1000)}kb\n
+                out:${round(nodeStats.network_tx / 1000)}kb`
             }
         }
         if (response.status !== 200) {
@@ -381,7 +431,7 @@
         }
         setTimeout(() => {
             sendDataUpdateStatus();
-        }, 1000)
+        }, 300)
     }
 
 </script>

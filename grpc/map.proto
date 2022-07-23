@@ -22,9 +22,17 @@ message Node {
   string production = 5;
 }
 
+message Stats {
+  float cpu_load = 1;
+  int32 memory_usage = 2;
+  int32 network_rx = 3;
+  int32 network_tx = 4;
+}
+
 message NodeState {
   Node node = 1;
   repeated ItemCounter items = 2;
+  Stats node_stats = 3;
 }
 
 message ItemCounter {

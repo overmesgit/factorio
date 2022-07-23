@@ -1,41 +1,26 @@
 package main
 
 import (
-	"context"
-	pb "github.com/overmesgit/factorio/grpc"
-	"github.com/overmesgit/factorio/nodemap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"time"
+	"fmt"
+	"runtime"
 )
 
 func main() {
-	conn, err := grpc.Dial(
-		nodemap.MapServer+":8080", grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	c := pb.NewMapClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	r, err := c.UpdateMap(
-		ctx, &pb.MapRequest{Nodes: []*pb.Node{
-			{
-				Type:      "IronMine",
-				Col:       0,
-				Row:       0,
-				Ip:        "",
-				Items:     nil,
-				Direction: "↓",
-			},
-		}},
-	)
-	if err != nil {
-		log.Fatalf("could not update: %v", err)
-	}
-	log.Printf("Resp: %s", r.GetNodes())
+	_ = make([]int64, 1_000_000)
+
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
+	//runtime.Stat
+
+	//fmt.Printf("%+v", m)
+	fmt.Printf("Alloc = %v MiB", bToMb(m.Alloc))
+	fmt.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
+	fmt.Printf("\tSys = %v MiB", bToMb(m.Sys))
+	fmt.Printf("\tNumGC = %v\n", m.NumGC)
+}
+
+func bToMb(b uint64) uint64 {
+	return b / 1024 / 1024
 }

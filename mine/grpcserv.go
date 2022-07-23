@@ -109,7 +109,7 @@ func RunServer() {
 	)
 
 	server := &server{}
-	server.RunMapper()
+	RunMapper()
 	MyWorker.StartWorker()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%s", port))

@@ -2,11 +2,11 @@
 'https://plantuml.com/component-diagram
 
 'TODO:
+'show cpu memory
+'all parent items
 'improve reliability (don't lost items)
 'chaos monkey (cpu, network, connections)
-'improve map: add delete, logs, icons
-'factory node
-'next tile factory
+'improve map: add delete
 'custom level for each title
 
 package "Local" {
