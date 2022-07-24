@@ -13,7 +13,9 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 )
 
 func init() {
@@ -120,6 +122,15 @@ func RunServer() {
 		)
 	}
 	s := grpc.NewServer()
+
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		signal.Notify(sigint, syscall.SIGTERM)
+		<-sigint
+		s.GracefulStop()
+	}()
+
 	pb.RegisterMineServer(s, server)
 	sugar.Sugar.Infow(
 		"server started",
