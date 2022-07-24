@@ -21,7 +21,36 @@ func NewSender() Sender {
 	return Sender{}
 }
 
-func (s Sender) SendItem(adjNode basic.Node, forSend basic.ItemType) error {
+func GrpcItemToItem(item *pb.Item) basic.Item {
+	var ingredientList []*basic.Item
+	for _, ingredient := range item.Ingredients {
+		grpcItem := GrpcItemToItem(ingredient)
+		ingredientList = append(ingredientList, &grpcItem)
+	}
+
+	return basic.Item{
+		ItemType:    basic.ItemType(item.Type),
+		Id:          item.Id,
+		Parents:     item.Parents,
+		Ingredients: ingredientList,
+	}
+}
+
+func ItemToGrpcItem(item basic.Item) pb.Item {
+	var ingredientList []*pb.Item
+	for _, ingredient := range item.Ingredients {
+		grpcItem := ItemToGrpcItem(*ingredient)
+		ingredientList = append(ingredientList, &grpcItem)
+	}
+	return pb.Item{
+		Type:        string(item.ItemType),
+		Id:          item.Id,
+		Parents:     item.Parents,
+		Ingredients: ingredientList,
+	}
+}
+
+func (s Sender) SendItem(adjNode basic.Node, forSend basic.Item) error {
 	sugar.Sugar.Infof("Send items. ForSend %v", forSend)
 
 	conn, err := grpc.Dial(
@@ -37,7 +66,8 @@ func (s Sender) SendItem(adjNode basic.Node, forSend basic.ItemType) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := c.ReceiveResource(ctx, &pb.Item{Type: string(forSend)})
+	item := ItemToGrpcItem(forSend)
+	r, err := c.ReceiveResource(ctx, &item)
 	if err != nil {
 		return err
 	}
@@ -48,7 +78,7 @@ func (s Sender) SendItem(adjNode basic.Node, forSend basic.ItemType) error {
 
 func (s Sender) AskForItem(
 	prevNode basic.Node, itemType basic.ItemType,
-) (basic.ItemType, error) {
+) (basic.Item, error) {
 	sugar.Sugar.Infof("Ask for item %v %v", prevNode, itemType)
 
 	conn, err := grpc.Dial(
@@ -56,7 +86,11 @@ func (s Sender) AskForItem(
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		return basic.NoItem, errors.New(fmt.Sprintf("did not connect: %v", err))
+		return basic.Item{ItemType: basic.NoItem}, errors.New(
+			fmt.Sprintf(
+				"did not connect: %v", err,
+			),
+		)
 	}
 	defer conn.Close()
 	c := pb.NewMineClient(conn)
@@ -66,10 +100,10 @@ func (s Sender) AskForItem(
 
 	r, err := c.GetResource(ctx, &pb.Item{Type: string(itemType)})
 	if err != nil {
-		return basic.NoItem, err
+		return basic.Item{ItemType: basic.NoItem}, err
 	}
 
-	return basic.ItemType(r.Type), nil
+	return GrpcItemToItem(r), nil
 }
 
 func (s Sender) AskForNeedItem(nextNode basic.Node) (basic.ItemType, error) {

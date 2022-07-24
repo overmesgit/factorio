@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"fmt"
 	"github.com/overmesgit/factorio/mine/sugar"
 	"github.com/overmesgit/factorio/mine/workers/basic"
 	"time"
@@ -9,20 +10,22 @@ import (
 type FurnaceNode struct {
 	storage basic.Storage
 	basic.BaseWorkerNode
+	myNode basic.Node
 }
 
 var _ basic.WorkerNode = FurnaceNode{}
 
 func NewFurnaceNode(
-	nextNode basic.Node, sender basic.Sender,
+	myNode basic.Node, sender basic.Sender,
 ) FurnaceNode {
 	res := FurnaceNode{
 		storage: basic.NewStorage(),
+		myNode:  myNode,
 	}
 	res.BaseWorkerNode = basic.NewWorkerNode(
 		&res.storage,
 		sender,
-		nextNode,
+		myNode.GetNextNode(),
 	)
 	return res
 }
@@ -32,6 +35,7 @@ func (n FurnaceNode) StartWorker() {
 }
 
 func (n FurnaceNode) melt() {
+	counter := 0
 	for {
 		time.Sleep(time.Second)
 		storage := n.storage
@@ -43,18 +47,33 @@ func (n FurnaceNode) melt() {
 			continue
 		}
 
-		// TODO: errors
-		storage.Get(basic.Iron)
-		storage.Get(basic.Coal)
-		storage.Add(basic.IronPlate)
+		iron, err := storage.Get(basic.Iron)
+		if err != nil {
+			sugar.Sugar.Errorf("Can't get item %v %v.", err, n.Storage.GetItemCount())
+			continue
+		}
+		coal, err := storage.Get(basic.Coal)
+		if err != nil {
+			sugar.Sugar.Errorf("Can't get item %v %v.", err, n.Storage.GetItemCount())
+			return
+		}
+		newIronPlate := basic.Item{
+			ItemType:    basic.IronPlate,
+			Id:          fmt.Sprintf("%s-%s-%v", n.myNode.Hostname, basic.IronPlate, counter),
+			Parents:     []string{iron.Id, coal.Id},
+			Ingredients: []*basic.Item{&iron, &coal},
+		}
+		counter++
+
+		storage.Add(newIronPlate)
 	}
 }
 
-func (n FurnaceNode) GetResourceForSend(basic.ItemType) (basic.ItemType, error) {
+func (n FurnaceNode) GetResourceForSend(basic.ItemType) (basic.Item, error) {
 	item, err := n.Storage.Get(basic.IronPlate)
 	if err != nil {
 		sugar.Sugar.Infof("Nothing to give %v.", n.Storage.GetItemCount())
-		return "", err
+		return basic.Item{ItemType: basic.NoItem}, err
 	}
 	return item, nil
 }

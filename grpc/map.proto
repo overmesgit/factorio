@@ -42,6 +42,9 @@ message ItemCounter {
 
 message Item {
   string type = 1;
+  string id = 2;
+  repeated string parents = 3;
+  repeated Item ingredients = 4;
 }
 
 message ItemList {

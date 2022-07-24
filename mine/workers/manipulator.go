@@ -28,11 +28,11 @@ func (n ManipulatorNode) GetNeededResource() (basic.ItemType, error) {
 	return basic.NoItem, errors.New("i'm an manipulator dumb dumb")
 }
 
-func (n ManipulatorNode) GetResourceForSend(basic.ItemType) (basic.ItemType, error) {
-	return basic.NoItem, errors.New("i'm an manipulator dumb dumb")
+func (n ManipulatorNode) GetResourceForSend(basic.ItemType) (basic.Item, error) {
+	return basic.Item{ItemType: basic.NoItem}, errors.New("i'm an manipulator dumb dumb")
 }
 
-func (n ManipulatorNode) ReceiveResource(itemType basic.ItemType) error {
+func (n ManipulatorNode) ReceiveResource(itemType basic.Item) error {
 	return errors.New("i'm an manipulator dumb dumb")
 }
 

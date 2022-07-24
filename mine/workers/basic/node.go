@@ -6,16 +6,16 @@ type ItemCounter struct {
 }
 
 type WorkerNode interface {
-	ReceiveResource(itemType ItemType) error
+	ReceiveResource(itemType Item) error
 	GetNeededResource() (ItemType, error)
-	GetResourceForSend(ItemType) (ItemType, error)
+	GetResourceForSend(ItemType) (Item, error)
 	StartWorker()
 	GetItemCount() []ItemCounter
 }
 
 type Sender interface {
-	SendItem(adjNode Node, forSend ItemType) error
-	AskForItem(prevNode Node, itemType ItemType) (ItemType, error)
+	SendItem(adjNode Node, forSend Item) error
+	AskForItem(prevNode Node, itemType ItemType) (Item, error)
 	AskForNeedItem(nextNode Node) (ItemType, error)
 }
 
@@ -23,13 +23,15 @@ type Node struct {
 	Row, Col  int32
 	NodeType  Type
 	Direction Direction
+	Hostname  string
 }
 
 func NewNode(
-	row, col int32, nodeType Type, direction Direction,
+	row, col int32, nodeType Type, direction Direction, hostname string,
 ) Node {
+
 	return Node{Row: row, Col: col, NodeType: nodeType,
-		Direction: direction}
+		Direction: direction, Hostname: hostname}
 }
 
 var directionIndex = map[Direction][]int32{

@@ -30,3 +30,10 @@ const (
 	NoItem  ItemType = "NoItem"
 	AnyItem ItemType = "AnyItem"
 )
+
+type Item struct {
+	ItemType    ItemType `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Id          string   `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Parents     []string `protobuf:"bytes,3,rep,name=parents,proto3" json:"parents,omitempty"`
+	Ingredients []*Item  `protobuf:"bytes,4,rep,name=ingredients,proto3" json:"ingredients,omitempty"`
+}

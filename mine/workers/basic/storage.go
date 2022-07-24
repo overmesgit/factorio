@@ -6,21 +6,21 @@ import (
 )
 
 type Storage struct {
-	itemByType   map[ItemType]chan ItemType
+	itemByType   map[ItemType]chan Item
 	totalStorage int
 }
 
 func NewStorage() Storage {
-	return Storage{itemByType: make(map[ItemType]chan ItemType), totalStorage: 100}
+	return Storage{itemByType: make(map[ItemType]chan Item), totalStorage: 100}
 }
 
 var storageFull = errors.New("storage full")
 
-func (s *Storage) Add(item ItemType) error {
-	store := s.itemByType[item]
+func (s *Storage) Add(item Item) error {
+	store := s.itemByType[item.ItemType]
 	if store == nil {
-		store = make(chan ItemType, s.totalStorage)
-		s.itemByType[item] = store
+		store = make(chan Item, s.totalStorage)
+		s.itemByType[item.ItemType] = store
 	}
 
 	select {
@@ -61,10 +61,10 @@ func (s *Storage) IsFull(itemType ItemType) bool {
 	return len(ch) >= s.totalStorage
 }
 
-func (s *Storage) Get(itemType ItemType) (ItemType, error) {
+func (s *Storage) Get(itemType ItemType) (Item, error) {
 	ch, ok := s.itemByType[itemType]
 	if !ok {
-		return NoItem, errors.New(string("storage is empty " + itemType))
+		return Item{ItemType: NoItem}, errors.New(string("storage is empty " + itemType))
 	}
 
 	select {
@@ -72,10 +72,10 @@ func (s *Storage) Get(itemType ItemType) (ItemType, error) {
 		return forSend, nil
 	default:
 	}
-	return NoItem, errors.New(string("storage is empty " + itemType))
+	return Item{ItemType: NoItem}, errors.New(string("storage is empty " + itemType))
 }
 
-func (s *Storage) GetAnyItem() (ItemType, error) {
+func (s *Storage) GetAnyItem() (Item, error) {
 	for _, ch := range s.itemByType {
 		select {
 		case forSend := <-ch:
@@ -83,7 +83,7 @@ func (s *Storage) GetAnyItem() (ItemType, error) {
 		default:
 		}
 	}
-	return NoItem, errors.New("storage is empty")
+	return Item{ItemType: NoItem}, errors.New("storage is empty")
 }
 
 func (s Storage) String() string {

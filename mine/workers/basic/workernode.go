@@ -20,7 +20,7 @@ func NewWorkerNode(
 	return BaseWorkerNode{Storage: storage, sender: sender, nextNode: nextNode}
 }
 
-func (d BaseWorkerNode) ReceiveResource(itemType ItemType) error {
+func (d BaseWorkerNode) ReceiveResource(itemType Item) error {
 	return d.Storage.Add(itemType)
 }
 
@@ -28,8 +28,8 @@ func (d BaseWorkerNode) GetNeededResource() (ItemType, error) {
 	return "", errors.New("nothing needed")
 }
 
-func (d BaseWorkerNode) GetResourceForSend(item ItemType) (ItemType, error) {
-	var forSend ItemType
+func (d BaseWorkerNode) GetResourceForSend(item ItemType) (Item, error) {
+	var forSend Item
 	var err error
 	if item == AnyItem {
 		forSend, err = d.Storage.GetAnyItem()
@@ -38,7 +38,7 @@ func (d BaseWorkerNode) GetResourceForSend(item ItemType) (ItemType, error) {
 	}
 	if err != nil {
 		sugar.Sugar.Infof("Nothing to give %v.", d.Storage.GetItemCount())
-		return "", err
+		return Item{ItemType: NoItem}, err
 	}
 	return forSend, nil
 }

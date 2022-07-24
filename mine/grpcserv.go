@@ -30,6 +30,10 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	hostname, err := os.Hostname()
+	if err != nil {
+		panic(err)
+	}
 
 	nodeType := basic.Type(os.Getenv("TYPE"))
 	nodeProduction := basic.Type(os.Getenv("PRODUCTION"))
@@ -38,6 +42,7 @@ func init() {
 		int32(col),
 		nodeType,
 		basic.Direction(os.Getenv("DIRECTION")),
+		hostname,
 	)
 
 	sender := grpcsender.NewSender()
@@ -48,16 +53,16 @@ func init() {
 	switch nodeType {
 	case basic.Mine:
 		// TODO: move get next MyNode into constructor
-		workerNode = workers.NewMine(nextNode, basic.ItemType(nodeProduction), sender)
+		workerNode = workers.NewMine(MyNode, basic.ItemType(nodeProduction), sender)
 	case basic.Furnace:
-		workerNode = workers.NewFurnaceNode(nextNode, sender)
+		workerNode = workers.NewFurnaceNode(MyNode, sender)
 	case basic.Manipulator:
 		workerNode = workers.NewManipulator(nextNode, prevNode, sender)
 	case basic.Belt:
 		workerNode = workers.NewBelt(nextNode, sender)
 	case basic.AssemblingMachine:
 		workerNode = workers.NewAssemblingMachine(
-			nextNode, basic.ItemType(nodeProduction), sender,
+			MyNode, basic.ItemType(nodeProduction), sender,
 		)
 	}
 	MyWorker = workerNode
@@ -74,7 +79,7 @@ type server struct {
 func (s *server) ReceiveResource(ctx context.Context, request *pb.Item) (*pb.Empty, error) {
 	nodemap.LogInput(ctx, "SendResource", request)
 
-	err := MyWorker.ReceiveResource(basic.ItemType(request.Type))
+	err := MyWorker.ReceiveResource(grpcsender.GrpcItemToItem(request))
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +105,8 @@ func (s *server) GetResource(ctx context.Context, request *pb.Item) (*pb.Item, e
 		return nil, err
 	}
 
-	return &pb.Item{Type: string(item)}, nil
+	grpcItem := grpcsender.ItemToGrpcItem(item)
+	return &grpcItem, nil
 }
 
 func RunServer() {
