@@ -40,7 +40,7 @@ func (n ManipulatorNode) StartWorker() {
 	go func() {
 		for {
 			n.transitResource()
-			time.Sleep(time.Second)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 }

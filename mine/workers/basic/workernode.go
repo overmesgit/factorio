@@ -3,6 +3,7 @@ package basic
 import (
 	"errors"
 	"github.com/overmesgit/factorio/mine/sugar"
+	"strings"
 	"time"
 )
 
@@ -20,21 +21,30 @@ func NewWorkerNode(
 	return BaseWorkerNode{Storage: storage, sender: sender, nextNode: nextNode}
 }
 
-func (d BaseWorkerNode) ReceiveResource(itemType Item) error {
-	return d.Storage.Add(itemType)
+func LogResource(item Item, offset int) {
+	offsetStr := strings.Repeat("     ", offset)
+	sugar.Sugar.Infof("%s^ Item %v %v", offsetStr, item.Id, item.ItemType)
+	for _, ingredient := range item.Ingredients {
+		LogResource(*ingredient, offset+1)
+	}
+}
+
+func (d BaseWorkerNode) ReceiveResource(item Item) error {
+	LogResource(item, 0)
+	return d.Storage.Add(item)
 }
 
 func (d BaseWorkerNode) GetNeededResource() (ItemType, error) {
 	return "", errors.New("nothing needed")
 }
 
-func (d BaseWorkerNode) GetResourceForSend(item ItemType) (Item, error) {
+func (d BaseWorkerNode) GetResourceForSend(itemType ItemType) (Item, error) {
 	var forSend Item
 	var err error
-	if item == AnyItem {
+	if itemType == AnyItem {
 		forSend, err = d.Storage.GetAnyItem()
 	} else {
-		forSend, err = d.Storage.Get(item)
+		forSend, err = d.Storage.Get(itemType)
 	}
 	if err != nil {
 		sugar.Sugar.Infof("Nothing to give %v.", d.Storage.GetItemCount())

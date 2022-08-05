@@ -10,6 +10,7 @@ import (
 	"github.com/overmesgit/factorio/mine/workers/basic"
 	"github.com/overmesgit/factorio/nodemap"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -19,7 +20,9 @@ import (
 )
 
 func init() {
-	logger, _ := zap.NewProduction()
+	loggerConfig := zap.NewProductionConfig()
+	loggerConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	logger, _ := loggerConfig.Build()
 	sugar.Sugar = logger.Sugar()
 
 	col, err := strconv.Atoi(os.Getenv("COL"))
